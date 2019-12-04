@@ -9,7 +9,7 @@ public class UserInfo {
 	 * 用户基本信息
 	 */
 
-	private int UID;// 保存该用户的JK号
+	private int UID;// 保存该用户的UID号
 	private String nickName;// 保存该用户的昵称
 	private int avatar;
 
@@ -26,7 +26,7 @@ public class UserInfo {
 	private byte collectionCount;// 保存有多少组好友
 	private String ListName[];// 保存每个分组的名称
 	private byte[] bodyCount;// 每组有多少个人
-	private int bodyNum[][];// 每个好友的JK号
+	private int bodyNum[][];// 每个好友的UID号
 	private int bodypic[][];//好友头像
 	private String bodyName[][];// 每个好友的昵称
 

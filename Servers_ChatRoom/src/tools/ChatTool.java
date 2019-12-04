@@ -7,7 +7,7 @@ import server.ServerThread;
 
 public class ChatTool {
 	/*
-	 * 这个方法用来向JKNum的用户发送内容为Msg的信息
+	 * 这个方法用来向UID的用户发送内容为Msg的信息
 	 * 
 	 * @return 是否成功发送
 	 */
