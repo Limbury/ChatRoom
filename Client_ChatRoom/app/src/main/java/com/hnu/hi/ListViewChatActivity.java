@@ -1,13 +1,21 @@
 package com.hnu.hi;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +24,12 @@ public class ListViewChatActivity extends AppCompatActivity {
     private List<ManList> listList = new ArrayList<>();
     private static final String TAG = "ListViewChatActivity";
     private TextView hostname;
+    public ImageView add_man;
+    public Button right;
+    public Button cancel;
+    public EditText nickname_edit;
+    private String nickname;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,10 +40,52 @@ public class ListViewChatActivity extends AppCompatActivity {
         hostname.setText("Hi  "+man_name);
         initLists();//初始化联系人列表
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list_recycler_view);
+        add_man = (ImageView) findViewById(R.id.add_man);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         ListAdapter adapter = new ListAdapter(listList);
         recyclerView.setAdapter(adapter);
+
+        add_man.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: ");
+                AlertDialog.Builder dialog = new AlertDialog.Builder(ListViewChatActivity.this);
+                final View dialogView = LayoutInflater.from(ListViewChatActivity.this).inflate(R.layout.activity_add_man,null);
+                //dialog.setTitle("2222");
+                dialog.setView(dialogView);
+                right = (Button)dialogView.findViewById(R.id.add_man_right_button);
+                cancel = (Button) dialogView.findViewById(R.id.add_man_cancel_button);
+                nickname_edit = (EditText)dialogView.findViewById(R.id.add_man_editText);
+                dialog.setPositiveButton("返回", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+
+                    }
+                });
+                dialog.show();
+                right.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        nickname = nickname_edit.getText().toString();
+                        Toast.makeText(ListViewChatActivity.this,nickname,Toast.LENGTH_SHORT).show();
+                    }
+                });
+                cancel.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //TODO
+                        nickname_edit.setText("");
+                        Toast.makeText(ListViewChatActivity.this,"cancel",Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+        });
+
+
         Log.d(TAG, "onCreate: list");
     }
     private void initLists(){
@@ -63,4 +119,5 @@ public class ListViewChatActivity extends AppCompatActivity {
         listList.add(manList14);
 
     }
+
 }

@@ -16,18 +16,18 @@ import msg.MsgTeamList;
 
 public class PackageTool {
 	/*
-	 * 向流对象中写入固定长度的字符串
+	 * ??????????写??????????????
 	 * 
-	 * @param dous 流对象
+	 * @param dous ??????
 	 * 
-	 * @param len 字节的长度
+	 * @param len ???????
 	 * 
-	 * @param s 写入的字符串
+	 * @param s 写????????
 	 */
 	private static void writeString(DataOutputStream dous, int len, String s) throws IOException {
 		byte[] data = s.getBytes();
 		if (data.length > len) {
-			throw new IOException("写入长度超长");
+			throw new IOException("写???????");
 		}
 		dous.write(data);
 		while (data.length < len) {
@@ -42,14 +42,14 @@ public class PackageTool {
 		writeHead(dous, msg);
 		int msgType = msg.getType();
 		/*
-		 * 0x01:注册请求
-		 * 0x11:注册应答
-		 * 0x02:登录请求
-		 * 0x22:登录应答
-		 * 0x05：添加好友
-		 * 0x55：好友应答
-		 * 0x03:好友列表
-		 * 0x04:聊天消息
+		 * 0x01:???????
+		 * 0x11:??????
+		 * 0x02:???????
+		 * 0x22:??????
+		 * 0x05????????
+		 * 0x55?????????
+		 * 0x03:?????斜?
+		 * 0x04:???????
 		 */
 		if (msgType == 0x01) {
 			MsgReg mr = (MsgReg) msg;
@@ -67,7 +67,7 @@ public class PackageTool {
 		} else if (msgType == 0x03) {
 			MsgTeamList mtl = (MsgTeamList) msg;
 
-			// 从mtl中获取信息
+			// ??mtl?谢?????
 			String userName = mtl.getUserName();
 			int pic = mtl.getPic();
 			byte listCount = mtl.getListCount();
@@ -78,15 +78,15 @@ public class PackageTool {
 			String nikeName[][] = mtl.getNikeName();
 			byte bodyState[][] = mtl.getBodyState();
 
-			// 开始写入流中
+			// ???写??????
 			int i, j;
 			writeString(dous, 10, userName);
 			dous.writeInt(pic);
-			dous.write(listCount);// 分组个数
+			dous.write(listCount);// ???????
 			for (i = 0; i < listCount; i++) {
 				writeString(dous, 10, listName[i]);
 				dous.write(bodyCount[i]);
-				for (j = 0; j < bodyCount[i]; j++) {// 每个组里面
+				for (j = 0; j < bodyCount[i]; j++) {// ?????????
 					dous.writeInt(bodyNum[i][j]);
 					dous.writeInt(bodyPic[i][j]);
 					writeString(dous, 10, nikeName[i][j]);
