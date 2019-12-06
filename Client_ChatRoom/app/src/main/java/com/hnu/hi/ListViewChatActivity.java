@@ -58,13 +58,13 @@ public class ListViewChatActivity extends AppCompatActivity {
                 right = (Button)dialogView.findViewById(R.id.add_man_right_button);
                 cancel = (Button) dialogView.findViewById(R.id.add_man_cancel_button);
                 nickname_edit = (EditText)dialogView.findViewById(R.id.add_man_editText);
-                dialog.setPositiveButton("返回", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-
-                    }
-                });
+//                dialog.setPositiveButton("返回", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//
+//
+//                    }
+//                });
                 dialog.show();
                 right.setOnClickListener(new View.OnClickListener() {
                     @Override
