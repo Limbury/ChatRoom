@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     private List<ManList> mList;
     long firstClickTime = 0;//修复双击打开两个同样的一对一聊天界面
+    private static final String TAG = "ListAdapter";
     static class ViewHolder extends RecyclerView.ViewHolder{
         View listView;
         ImageView listImage;
@@ -33,6 +34,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     public ListAdapter(List<ManList> list){
         mList = list;
+        firstClickTime = 0;//双击后退出重置时间，防止双击后再点击进不去
     }
 
     @NonNull
@@ -45,23 +47,30 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             public void onClick(View v) {
                 Context context = v.getContext();
                 ////修复双击打开两个同样的一对一聊天界面
-                if(firstClickTime >= 0){
+                //Boolean flag_double = Boolean.TRUE;
+
+                if(firstClickTime > 0){
                     long secondClickTime = SystemClock.uptimeMillis();//距离上次开机时间
                     long dtime = secondClickTime - firstClickTime;
-                    if(dtime > 500){//双击不做操作
+                    if(300 < dtime && dtime <1000){//双击不做操作 大于1000是从一对一界面返回了
+                        //flag_double = Boolean.FALSE;
                         Toast.makeText(context, "请勿双击", Toast.LENGTH_SHORT).show();
-                    } else{
-                        firstClickTime = 0;
-                        int position = holder.getAdapterPosition();
-                        ManList manList = mList.get(position);
-                        String name = manList.getName();
-                        Toast.makeText(context,"即将和"+name+"聊天",Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(context,MainActivity.class);
-                        intent.putExtra("name",name);
-                        context.startActivity(intent);
+                        firstClickTime = 0;//双击后退出重置时间，防止双击后再点击进不去
+                        return;
                     }
+//                    else if(dtime > 1000){
+//                        firstClickTime = 0;
+//                        return;
+//                    }
                 }
                 firstClickTime = SystemClock.uptimeMillis();
+                int position = holder.getAdapterPosition();
+                ManList manList = mList.get(position);
+                String name = manList.getName();
+                Toast.makeText(context,"即将和"+name+"聊天",Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(context,MainActivity.class);
+                intent.putExtra("name",name);
+                context.startActivity(intent);
 
             }
         });
