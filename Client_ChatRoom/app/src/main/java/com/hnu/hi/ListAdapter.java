@@ -3,6 +3,7 @@ package com.hnu.hi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +55,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                     long dtime = secondClickTime - firstClickTime;
                     if(300 < dtime && dtime <1000){//双击不做操作 大于1000是从一对一界面返回了
                         //flag_double = Boolean.FALSE;
+                        Log.d(TAG, "onClick: 双击");
                         Toast.makeText(context, "请勿双击", Toast.LENGTH_SHORT).show();
                         firstClickTime = 0;//双击后退出重置时间，防止双击后再点击进不去
                         return;
@@ -70,6 +72,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 Toast.makeText(context,"即将和"+name+"聊天",Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(context,MainActivity.class);
                 intent.putExtra("name",name);
+                Log.d(TAG, "onClick: 启动聊天界面");
                 context.startActivity(intent);
 
             }
