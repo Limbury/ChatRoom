@@ -11,6 +11,7 @@ import java.net.Socket;
 
 //import javax.swing.JOptionPane;
 
+import com.hnu.hi.Msg;
 import com.hnu.hi.data.ListInfo;
 import com.hnu.hi.data.Figures;
 import com.hnu.hi.msg.MsgAddFriend;
@@ -34,11 +35,29 @@ public class Client_ChatRoom extends Thread {
     private InputStream ins;
     private OutputStream ous;
     private static final String TAG = "Client_ChatRoom";
-    public Client_ChatRoom(String serverip, int port) {
+
+    //完美单例模式
+    private volatile static Client_ChatRoom client_chatRoom;
+    private Client_ChatRoom(String serverIp, int port) {
         super();
-        this.serverip = serverip;
+        this.serverip = serverIp;
         this.port = port;
     }
+//            要从Android模拟器访问PC localhost，请使用10.0.2.2而不是127.0.0.1。 localhost或127.0.0.1是指模拟设备本身，而不是运行模拟器的主机。
+//            参考：http://developer.android.com/tools/devices/emulator.html#networkaddresses
+//
+//            对于Genymotion使用：10.0.3.2而不是10.0.2.2
+
+    public static Client_ChatRoom getClient_chatRoom(){
+        if(client_chatRoom == null){
+            synchronized (Client_ChatRoom.class){
+                if(client_chatRoom == null)
+                    client_chatRoom = new Client_ChatRoom("10.0.2.2",6666);
+            }
+        }
+        return client_chatRoom;
+    }
+
     /*
      * 链接服务器
      */
@@ -132,6 +151,7 @@ public class Client_ChatRoom extends Thread {
     public ListInfo getlist() throws IOException {
         byte[] data = receiveMsg();
         MsgHead recMsg = ParseTool.parseMsg(data);
+        Log.d(TAG, "getlist: 接受好友列表信息");
         if (recMsg.getType() != 0x03) {
             System.out.println("通讯协议错误");
             System.exit(0);

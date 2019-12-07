@@ -3,6 +3,7 @@ package com.hnu.hi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.hnu.hi.client.Client_ChatRoom;
+import com.hnu.hi.data.ListInfo;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,15 +35,33 @@ public class ListViewChatActivity extends AppCompatActivity {
     public Button cancel;
     public EditText nickname_edit;
     private String nickname;
-
+    private Client_ChatRoom client_chatRoom = Client_ChatRoom.getClient_chatRoom();
+    private ListInfo listInfo;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.listview);
-        Intent intent = getIntent();
-        String man_name = intent.getStringExtra("Displayname");
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                .detectDiskReads().detectDiskWrites().detectNetwork()
+                .penaltyLog().build());
+        //获取信息
+        //Intent intent = getIntent();
+
+        //String ClientJsonData = intent.getStringExtra("client");
+        //String ListInfoJdonData = intent.getStringExtra("ListInfo");
+
+        //listInfo = new Gson().fromJson(ListInfoJdonData,ListInfo.class);
+        try {
+            Log.d(TAG, "onCreate: 获取好友列表");
+            listInfo = client_chatRoom.getlist();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String man_name = listInfo.getNickName();
         hostname = (TextView) findViewById(R.id.list_host_name);
         hostname.setText("Hi  "+man_name);
+
+
         initLists();//初始化联系人列表
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list_recycler_view);
         add_man = (ImageView) findViewById(R.id.add_man);
@@ -120,4 +144,15 @@ public class ListViewChatActivity extends AppCompatActivity {
 
     }
 
+//    private Boolean getManList() throws IOException {
+//        try{
+//            ListInfo listInfo = client_chatRoom.getlist();
+//        }
+//        catch (Exception e){
+//            e.printStackTrace();
+//
+//        }
+//        return false;
+//    }
+//
 }

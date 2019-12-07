@@ -20,13 +20,13 @@ public class LoginDataSource {
 //            参考：http://developer.android.com/tools/devices/emulator.html#networkaddresses
 //
 //            对于Genymotion使用：10.0.3.2而不是10.0.2.2
-            Client_ChatRoom client_chatRoom = new Client_ChatRoom("10.0.2.2",6666);
-
+            Client_ChatRoom client_chatRoom = Client_ChatRoom.getClient_chatRoom();
+            ListInfo listInfo;
             if(client_chatRoom.ConnectServer()){
                 if(client_chatRoom.Login(Integer.parseInt(username),password) == 0){//登录成功
                     Log.d(TAG, "login: client_chatRoom.Login(Integer.parseInt(username),password) == 0");
-                    ListInfo listInfo = client_chatRoom.getlist();
-                    username = listInfo.getNickName();
+                    //listInfo = client_chatRoom.getlist();
+                    //username = listInfo.getNickName();
                 }
                 else {
                     Log.d(TAG, "login: 登录失败");
@@ -44,6 +44,7 @@ public class LoginDataSource {
 //            if (!username.equals("Gol_Light")){
 //                throw new LoginException("用户不是Gol_Light");
 //            }
+            Log.d(TAG, "login: 验证成功");
             return new Result.Success<>(fakeUser);
         } catch (Exception e) {
             return new Result.Error(new IOException("Error logging in", e));

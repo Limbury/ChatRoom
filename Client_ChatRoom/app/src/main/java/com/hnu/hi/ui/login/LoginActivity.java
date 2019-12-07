@@ -25,8 +25,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
 import com.hnu.hi.ListViewChatActivity;
 import com.hnu.hi.R;
+import com.hnu.hi.client.Client_ChatRoom;
+import com.hnu.hi.data.ListInfo;
 import com.hnu.hi.ui.login.LoginViewModel;
 import com.hnu.hi.ui.login.LoginViewModelFactory;
 
@@ -40,7 +43,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
-        //android4.0后联网需要新开线程
+
         StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                 .detectDiskReads().detectDiskWrites().detectNetwork()
                 .penaltyLog().build());
@@ -132,8 +135,10 @@ public class LoginActivity extends AppCompatActivity {
         // TODO : initiate successful logged in experience
         Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
         Intent intent = new Intent(LoginActivity.this, ListViewChatActivity.class);
-
-        intent.putExtra("Displayname",model.getDisplayName());
+        //intent.putExtra("client",new Gson().toJson(client_chatRoom));
+        //intent.putExtra("ListInfo",new Gson().toJson(listInfo));
+        //intent.putExtra("DisPlayName",listInfo.getNickName());
+        Log.d(TAG, "updateUiWithUser: 鍑嗗杩涘叆濂藉弸鍒楄〃");
         startActivity(intent);
     }
 
