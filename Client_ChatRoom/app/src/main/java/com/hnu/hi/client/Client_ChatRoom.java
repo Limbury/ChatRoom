@@ -9,11 +9,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
+
 //import javax.swing.JOptionPane;
 
 import com.hnu.hi.Msg;
 import com.hnu.hi.data.ListInfo;
 import com.hnu.hi.data.Figures;
+import com.hnu.hi.data.LoginDataSource;
 import com.hnu.hi.msg.MsgAddFriend;
 import com.hnu.hi.msg.MsgAddFriendResp;
 import com.hnu.hi.msg.MsgChatText;
@@ -53,6 +55,7 @@ public class Client_ChatRoom extends Thread {
             synchronized (Client_ChatRoom.class){
                 if(client_chatRoom == null)
                     client_chatRoom = new Client_ChatRoom("10.0.2.2",6666);
+                    //client_chatRoom.start();
             }
         }
         return client_chatRoom;
@@ -178,6 +181,7 @@ public class Client_ChatRoom extends Thread {
         }
         else if(MsgType == 0x03){//更新好友列表
             System.out.println("Refresh list");
+            Log.d(TAG, "processMsg: 更新好友列表");
             ListInfo list = packlist(recMsg);
             //Figures.list.Refresh_List(list);
         }
@@ -228,6 +232,7 @@ public class Client_ChatRoom extends Thread {
 
             if (recMsg.getType() != 0x11) {// 不是回应注册消息
                 System.out.println("通讯协议错误");
+                Log.d(TAG, "Reg: 通讯协议错误");
                 return false;
             }
 
@@ -238,12 +243,14 @@ public class Client_ChatRoom extends Thread {
                  * 注册成功
                  */
                 // System.out.println("注册的JK号为" + mrr.getDest());
+                Log.d(TAG, "Reg: 注册的JK号为" + mrr.getDest());
                 //JOptionPane.showMessageDialog(null, "注册成功\nJK码为" + mrr.getDest());
                 return true;
             } else {
                 /*
                  * 注册失败
                  */
+                Log.d(TAG, "Reg: 未知错误");
                 return false;
             }
         } catch (IOException e) {
@@ -286,7 +293,7 @@ public class Client_ChatRoom extends Thread {
                 return 5;
             }
             MsgLoginResp mlr = (MsgLoginResp) recMsg;
-            Log.d(TAG, "Login: 208");
+            //Log.d(TAG, "Login: 208");
             byte resp = mlr.getState();
             Log.d(TAG, "Login: resp");
             if (resp == 0) {

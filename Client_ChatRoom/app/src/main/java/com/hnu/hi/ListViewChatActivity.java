@@ -3,7 +3,9 @@ package com.hnu.hi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Message;
 import android.os.StrictMode;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,9 +19,13 @@ import com.google.gson.Gson;
 import com.hnu.hi.client.Client_ChatRoom;
 import com.hnu.hi.data.ListInfo;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -29,21 +35,46 @@ import androidx.recyclerview.widget.RecyclerView;
 public class ListViewChatActivity extends AppCompatActivity {
     private List<ManList> listList = new ArrayList<>();
     private static final String TAG = "ListViewChatActivity";
-    private TextView hostname;
-    public ImageView add_man;
+    TextView hostname;
+    ImageView add_man;
     public Button right;
     public Button cancel;
     public EditText nickname_edit;
     private String nickname;
     private Client_ChatRoom client_chatRoom = Client_ChatRoom.getClient_chatRoom();
     private ListInfo listInfo;
+    private ExecutorService mThreadPool;
+    public final int MSG_DOWN_FAIL = 1;
+    public final int MSG_DOWN_SUCCESS = 2;
+    public final int MSG_DOWN_START = 3;
+    private Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch(msg.what){
+                case MSG_DOWN_FAIL:
+                    //mTipTv.setText("download fial");
+                    break;
+                case MSG_DOWN_SUCCESS:
+                    String man_name = listInfo.getNickName().toString();
+                    Integer man_uid = listInfo.getJKNum();
+                    hostname = (TextView) findViewById(R.id.list_host_name);
+                    hostname.setText("Hi  "+man_uid+"("+man_name+")");
+                    break;
+                case MSG_DOWN_START:
+                    //mTipTv.setText("download start");
+                    break;
+            }
+        };
+    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.listview);
-        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
-                .detectDiskReads().detectDiskWrites().detectNetwork()
-                .penaltyLog().build());
+//        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+//                .detectDiskReads().detectDiskWrites().detectNetwork()
+//                .penaltyLog().build());
+
+        //mThreadPool = Executors.newCachedThreadPool();//初始化线程
+
         //获取信息
         //Intent intent = getIntent();
 
@@ -51,15 +82,13 @@ public class ListViewChatActivity extends AppCompatActivity {
         //String ListInfoJdonData = intent.getStringExtra("ListInfo");
 
         //listInfo = new Gson().fromJson(ListInfoJdonData,ListInfo.class);
-        try {
-            Log.d(TAG, "onCreate: 获取好友列表");
-            listInfo = client_chatRoom.getlist();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String man_name = listInfo.getNickName();
-        hostname = (TextView) findViewById(R.id.list_host_name);
-        hostname.setText("Hi  "+man_name);
+
+
+//        let testString:String = "成都"
+//        let utf8String = (testString as NSString).UTF8String
+        new MyThread().start();
+
+
 
 
         initLists();//初始化联系人列表
@@ -82,18 +111,12 @@ public class ListViewChatActivity extends AppCompatActivity {
                 right = (Button)dialogView.findViewById(R.id.add_man_right_button);
                 cancel = (Button) dialogView.findViewById(R.id.add_man_cancel_button);
                 nickname_edit = (EditText)dialogView.findViewById(R.id.add_man_editText);
-//                dialog.setPositiveButton("返回", new DialogInterface.OnClickListener() {
-//                    @Override
-//                    public void onClick(DialogInterface dialog, int which) {
-//
-//
-//                    }
-//                });
                 dialog.show();
                 right.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         nickname = nickname_edit.getText().toString();
+
                         Toast.makeText(ListViewChatActivity.this,nickname,Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -113,6 +136,8 @@ public class ListViewChatActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: list");
     }
     private void initLists(){
+        ManList manList520=  new ManList("韩逸清",R.drawable.emotion_aixin);
+        listList.add(manList520);
         ManList manList1=  new ManList("李益军",R.drawable.ic_launcher);
         listList.add(manList1);
         ManList manList2=  new ManList("符希健",R.drawable.ic_launcher);
@@ -145,14 +170,28 @@ public class ListViewChatActivity extends AppCompatActivity {
     }
 
 //    private Boolean getManList() throws IOException {
-//        try{
-//            ListInfo listInfo = client_chatRoom.getlist();
-//        }
-//        catch (Exception e){
-//            e.printStackTrace();
+//        listInfo.getListCount();
 //
-//        }
-//        return false;
+//         return false;
 //    }
-//
+
+    class MyThread extends Thread {
+        @Override
+        public void run() {
+            try {
+                Log.d(TAG, "run: 获取好友列表");
+
+                listInfo = client_chatRoom.getlist();
+                Message msg = new Message();
+                msg.what = MSG_DOWN_SUCCESS;
+                mHandler.sendMessage(msg);
+                client_chatRoom.start();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG,"MyThread stop run");
+        }
+    }
+
 }

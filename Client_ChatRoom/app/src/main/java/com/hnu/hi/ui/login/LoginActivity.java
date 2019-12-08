@@ -28,6 +28,7 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.hnu.hi.ListViewChatActivity;
 import com.hnu.hi.R;
+import com.hnu.hi.RegActivity;
 import com.hnu.hi.client.Client_ChatRoom;
 import com.hnu.hi.data.ListInfo;
 import com.hnu.hi.ui.login.LoginViewModel;
@@ -41,6 +42,10 @@ public class LoginActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        Intent intent = getIntent();
+        String uid = intent.getStringExtra("uid");
+
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
 
@@ -51,6 +56,12 @@ public class LoginActivity extends AppCompatActivity {
         final EditText passwordEditText = findViewById(R.id.password);
         final Button loginButton = findViewById(R.id.login);
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
+        final Button regButton = findViewById(R.id.registerButton);
+
+        if(uid != null){
+            usernameEditText.setText(uid);
+        }
+
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
@@ -84,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                 setResult(Activity.RESULT_OK);
 
                 //Complete and destroy login activity once successful
-                //finish();
+                finish();
             }
         });
 
@@ -122,10 +133,21 @@ public class LoginActivity extends AppCompatActivity {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "onClick: click!");
+                Log.d(TAG, "onClick: loginButton click!");
                 loadingProgressBar.setVisibility(View.VISIBLE);
                 loginViewModel.login(usernameEditText.getText().toString(),
                         passwordEditText.getText().toString());
+            }
+        });
+
+        regButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "onClick: regButton click");
+                Intent intent =  new Intent(LoginActivity.this, RegActivity.class);
+                //intent.putExtra("who","Login");
+                Log.d(TAG, "onClick: 准备进入注册界面");
+                startActivity(intent);
             }
         });
     }
@@ -137,7 +159,7 @@ public class LoginActivity extends AppCompatActivity {
         Intent intent = new Intent(LoginActivity.this, ListViewChatActivity.class);
         //intent.putExtra("client",new Gson().toJson(client_chatRoom));
         //intent.putExtra("ListInfo",new Gson().toJson(listInfo));
-        //intent.putExtra("DisPlayName",listInfo.getNickName());
+        //intent.putExtra("who","Login");
         Log.d(TAG, "updateUiWithUser: 准备进入好友列表");
         startActivity(intent);
     }

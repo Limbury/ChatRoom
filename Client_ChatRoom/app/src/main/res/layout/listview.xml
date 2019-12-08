@@ -14,7 +14,7 @@
             android:id="@+id/list_host_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="left"
             android:layout_weight="9"
             android:text="Hi  Gol_Light"
             android:textColor="@color/white"
