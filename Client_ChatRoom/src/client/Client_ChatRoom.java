@@ -261,7 +261,7 @@ public class Client_ChatRoom extends Thread {
 				OwnJKNum = id;
 				return 0;
 			} else if (resp == 1) {
-				System.out.println("JKºÅ»òÃÜÂë´íÎó");
+				System.out.println("IDºÅ»òÃÜÂë´íÎó");
 				return 1;
 			} else if(resp == 2){
 				System.out.println("Õâ¸öÕËºÅÒÑ¾­µÇÂ½");
