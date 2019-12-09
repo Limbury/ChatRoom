@@ -2,7 +2,9 @@ package tools;
 
 import java.io.IOException;
 
+import db.MsgPool;
 import db.ThreadPool;
+import msg.MsgChatText;
 import server.ServerThread;
 
 public class ChatTool {
@@ -43,6 +45,7 @@ public class ChatTool {
 	 * 这个方法由于JKNum的用户不在线 保存向JKNum的用户发送内容为Msg的信息
 	 */
 	public static void saveOnServer(int from,int to, String Msg) {
-
+		MsgChatText mct = new MsgChatText(from, to, Msg);
+		MsgPool.msgpool.add(mct);
 	}
 }

@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.sql.SQLException;
 
+import db.MsgPool;
 import db.Server_id;
 import db.ThreadPool;
 import db.UserInfo;
@@ -150,6 +151,7 @@ public class ServerThread extends Thread {
                 userid = ml.getSrc();
                 ThreadRegDelTool.RegThread(this); // 向线程数据库中注册这个线程
                 sendFriendList();
+                sendUnacessMsg();
                 isOnline = true;// 设置已登录客户端
                 broadcastState();
             }
@@ -176,6 +178,21 @@ public class ServerThread extends Thread {
         System.out.println("发送好友列表");
 
        
+        UserModi model = new UserModi();
+        UserInfo user = model.getUserByUID(userid);
+        MsgTeamList mtl = new MsgTeamList(user);
+        mtl.send(ous);
+    }
+	
+	private void sendUnacessMsg() throws IOException, SQLException {
+        System.out.println("发送不在线时消息");
+        for(int i=0;i<MsgPool.msgpool.size();i++) {
+        	MsgChatText mct=MsgPool.msgpool.get(i);
+        	if(mct.getDest() == userid) {
+        		mct.send(ous);
+        		mct.setDest(-1);
+        	}
+        }
         UserModi model = new UserModi();
         UserInfo user = model.getUserByUID(userid);
         MsgTeamList mtl = new MsgTeamList(user);
