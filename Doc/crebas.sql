@@ -1,6 +1,6 @@
 /*==============================================================*/
 /* DBMS name:      MySQL 5.0                                    */
-/* Created on:     2019/12/4 20:30:36                           */
+/* Created on:     2019/12/8 20:27:21                           */
 /*==============================================================*/
 
 
@@ -15,9 +15,9 @@ drop table if exists userinfo;
 /*==============================================================*/
 create table relationship_1
 (
-   lid                  int not null,
    uid                  int not null,
-   primary key (lid, uid)
+   lid                  int not null,
+   primary key (uid, lid)
 );
 
 alter table relationship_1 comment '一个用户又多个好友分组';
@@ -27,7 +27,7 @@ alter table relationship_1 comment '一个用户又多个好友分组';
 /*==============================================================*/
 create table uid_lid
 (
-   lid                  int not null,
+   lid                  int not null auto_increment,
    uid                  int,
    lname                text not null,
    primary key (lid)
@@ -40,7 +40,7 @@ alter table uid_lid comment '好友分组';
 /*==============================================================*/
 create table userinfo
 (
-   uid                  int not null,
+   uid                  int not null auto_increment,
    pwd                  text not null,
    nickname             text not null,
    avatar               int not null,

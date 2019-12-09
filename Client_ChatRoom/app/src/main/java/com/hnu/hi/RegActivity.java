@@ -83,17 +83,18 @@ public class RegActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Log.d(TAG, "onClick: click");
                 if(client_chatRoom.ConnectServer()){
-                    if(client_chatRoom.Reg(reg_usernameEditText.getText().toString(),reg_passwordEditText.getText().toString())){
+                   Integer reg = client_chatRoom.Reg(reg_usernameEditText.getText().toString(),reg_passwordEditText.getText().toString());
+                    if(reg > 0){
                         Toast.makeText(RegActivity.this,"注册成功",Toast.LENGTH_SHORT).show();
                         Intent intent = new Intent(RegActivity.this, LoginActivity.class);
-                        intent.putExtra("uid","123457");
+                        intent.putExtra("uid",reg.toString());
                         Log.d(TAG, "onClick: 返回登陆界面列表");
                         startActivity(intent);
                     }
                 }
                 else {
                     Log.d(TAG, "onClick: 服务器连接失败");
-                }
+               }
 
             }
         });

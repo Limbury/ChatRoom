@@ -1,6 +1,8 @@
 package com.hnu.hi.client;
 
 
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 
 import java.io.DataInputStream;
@@ -12,6 +14,7 @@ import java.net.Socket;
 
 //import javax.swing.JOptionPane;
 
+import com.hnu.hi.ListViewChatActivity;
 import com.hnu.hi.Msg;
 import com.hnu.hi.data.ListInfo;
 import com.hnu.hi.data.Figures;
@@ -32,14 +35,16 @@ public class Client_ChatRoom extends Thread {
     private String serverip;
     private int port;
     private Socket client;
-
+    private Handler handler;
     private static int OwnJKNum;// 当登陆成功后，就该ChatClient的唯一JK号
     private InputStream ins;
     private OutputStream ous;
     private static final String TAG = "Client_ChatRoom";
+    private ListInfo listInfo;
 
     //完美单例模式
     private volatile static Client_ChatRoom client_chatRoom;
+
     private Client_ChatRoom(String serverIp, int port) {
         super();
         this.serverip = serverIp;
@@ -55,11 +60,22 @@ public class Client_ChatRoom extends Thread {
             synchronized (Client_ChatRoom.class){
                 if(client_chatRoom == null)
                     client_chatRoom = new Client_ChatRoom("10.0.2.2",6666);
+                    //client_chatRoom = new Client_ChatRoom("192.168.43.90",6666);
                     //client_chatRoom.start();
             }
         }
         return client_chatRoom;
     }
+
+    public void setHandler(Handler handler) {
+        this.handler = handler;
+    }
+
+    public void setListInfo(ListInfo listInfo){
+        this.listInfo = listInfo;
+    }
+
+    public ListInfo getListInfo(){return listInfo;}
 
     /*
      * 链接服务器
@@ -118,19 +134,22 @@ public class Client_ChatRoom extends Thread {
         byte[] sendMsg = PackageTool.packMsg(mct);
         ous.write(sendMsg);
         ous.flush();
+        Log.d(TAG, "sendMsg: send to"+to+" "+Msg);
     }
     /*
      * 读消息
      */
     public byte[] receiveMsg() throws IOException {
         DataInputStream dis = new DataInputStream(ins);
-        Log.d(TAG, "receiveMsg: 105");
+        Log.d(TAG, "receiveMsg: dis.readInt()为空报错");
         int totalLen = dis.readInt();
         System.out.println("TotalLen"+totalLen);
+        //if(totalLen == 67109364)totalLen = 20;
         Log.d(TAG, "receiveMsg: TotalLen="+totalLen);
         // 读取totalLen长度的数据
         byte[] data = new byte[totalLen - 4];
         dis.readFully(data);
+        Log.d(TAG, "receiveMsg: 数据读取成功");
         return data;
     }
 
@@ -161,7 +180,18 @@ public class Client_ChatRoom extends Thread {
         }
         return packlist(recMsg);
     }
+    public MsgRegResp getRegResp() throws IOException {
+        byte[] data = receiveMsg();
+        MsgHead recMsg = ParseTool.parseMsg(data);
 
+        Log.d(TAG, "getlist: 接受好友列表信息");
+        if (recMsg.getType() != 0x11) {
+            System.out.println("通讯协议错误");
+            System.exit(0);
+        }
+        MsgRegResp mrr = (MsgRegResp) recMsg;
+        return mrr;
+    }
     /**
      * processMsg 接受服务器传来的消息
      *
@@ -178,11 +208,21 @@ public class Client_ChatRoom extends Thread {
             MsgChatText mct = (MsgChatText) recMsg;
             int from = mct.getSrc();
             String Msg = mct.getMsgText();
+            Log.d(TAG, "processMsg: 0x04 "+from+"  "+Msg);
+            Message msg = new Message();
+            msg.what = 0x04;
+            msg.obj = Msg;
+            msg.arg1 = from;
+            handler.sendMessage(msg);
         }
         else if(MsgType == 0x03){//更新好友列表
             System.out.println("Refresh list");
             Log.d(TAG, "processMsg: 更新好友列表");
             ListInfo list = packlist(recMsg);
+            Message msg = new Message();
+            msg.what = 0x03;
+            msg.obj = list;
+            handler.sendMessage(msg);
             //Figures.list.Refresh_List(list);
         }
         if (MsgType == 0x55){
@@ -190,10 +230,15 @@ public class Client_ChatRoom extends Thread {
             MsgAddFriendResp mafr = (MsgAddFriendResp) recMsg;
             byte result = mafr.getState();
             System.out.println("Add Friend Result "+result);
+            Log.d(TAG, "processMsg: Add Friend Result:"+result);
 			/*if(Figures.afu != null){
 //				System.out.println("To show Result");
 				Figures.afu.showResult(result);
 			}*/
+            Message msg = new Message();
+            msg.what = 0x55;
+            msg.obj = result;
+            handler.sendMessage(msg);
         }
     }
 
@@ -206,7 +251,7 @@ public class Client_ChatRoom extends Thread {
      *            密码
      * @return 注册状态
      */
-    public boolean Reg(String NikeName, String PassWord) {
+    public int Reg(String NikeName, String PassWord) {
         try {
             MsgReg mr = new MsgReg();
             int len = 33; // MsgReg的长度为固定的33
@@ -233,7 +278,7 @@ public class Client_ChatRoom extends Thread {
             if (recMsg.getType() != 0x11) {// 不是回应注册消息
                 System.out.println("通讯协议错误");
                 Log.d(TAG, "Reg: 通讯协议错误");
-                return false;
+                return 0;
             }
 
             MsgRegResp mrr = (MsgRegResp) recMsg;
@@ -245,19 +290,19 @@ public class Client_ChatRoom extends Thread {
                 // System.out.println("注册的JK号为" + mrr.getDest());
                 Log.d(TAG, "Reg: 注册的JK号为" + mrr.getDest());
                 //JOptionPane.showMessageDialog(null, "注册成功\nJK码为" + mrr.getDest());
-                return true;
+                return mrr.getDest();
             } else {
                 /*
                  * 注册失败
                  */
                 Log.d(TAG, "Reg: 未知错误");
-                return false;
+                return 0;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         System.out.println("与服务器断开连接");
-        return false;
+        return 0;
     }
 
     /**
@@ -338,6 +383,7 @@ public class Client_ChatRoom extends Thread {
         maf.setList_name(list_name);
         byte[] sendMsg = PackageTool.packMsg(maf);
         ous.write(sendMsg);
+        Log.d(TAG, "SendaddFriend: ffa");
         ous.flush();
     }
 

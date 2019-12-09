@@ -46,7 +46,7 @@
         android:background="@color/divider_line">
 
         <TextView
-            android:id="@+id/haoyou"
+            android:id="@+id/xiaoxi"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:gravity="center"
@@ -56,11 +56,12 @@
             android:textSize="24sp" />
 
         <TextView
-            android:id="@+id/xiaoxi"
+            android:id="@+id/haoyou"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
+            android:background="@color/white"
             android:text="好友"
             android:textColor="@color/colorPrimary"
             android:textSize="24sp" />

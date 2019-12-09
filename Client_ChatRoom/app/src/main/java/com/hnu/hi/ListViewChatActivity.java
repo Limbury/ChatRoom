@@ -2,6 +2,7 @@ package com.hnu.hi;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Message;
 import android.os.StrictMode;
@@ -34,13 +35,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class ListViewChatActivity extends AppCompatActivity {
     private List<ManList> listList = new ArrayList<>();
+    private List<ManList> list_mess = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private ListAdapter adapter;
     private static final String TAG = "ListViewChatActivity";
     TextView hostname;
     ImageView add_man;
     public Button right;
     public Button cancel;
+
+    public  TextView mess;
+    public  TextView friendList;
     public EditText nickname_edit;
     private String nickname;
+    private String chat_id;
+    private String chat_name;
     private Client_ChatRoom client_chatRoom = Client_ChatRoom.getClient_chatRoom();
     private ListInfo listInfo;
     private ExecutorService mThreadPool;
@@ -50,8 +59,26 @@ public class ListViewChatActivity extends AppCompatActivity {
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
             switch(msg.what){
-                case MSG_DOWN_FAIL:
-                    //mTipTv.setText("download fial");
+                case 0x03:
+                    listInfo = (ListInfo) msg.obj;
+                    client_chatRoom.setListInfo(listInfo);
+                    String man_name1 = listInfo.getNickName().toString();
+                    Integer man_uid2 = listInfo.getJKNum();
+                    hostname = (TextView) findViewById(R.id.list_host_name);
+                    hostname.setText("Hi  "+man_uid2+"("+man_name1+")");
+                    flushManList();
+                    break;
+                case 0x554:
+                    addMess((ManList) msg.obj);
+                    break;
+                case 0x55:
+                    byte result = (byte)msg.obj;
+                    if(result == 0){
+                        Toast.makeText(ListViewChatActivity.this,"添加好友成功",Toast.LENGTH_LONG).show();
+                    }
+                    else{
+                        Toast.makeText(ListViewChatActivity.this,"添加好友失败",Toast.LENGTH_LONG).show();
+                    }
                     break;
                 case MSG_DOWN_SUCCESS:
                     String man_name = listInfo.getNickName().toString();
@@ -59,9 +86,9 @@ public class ListViewChatActivity extends AppCompatActivity {
                     hostname = (TextView) findViewById(R.id.list_host_name);
                     hostname.setText("Hi  "+man_uid+"("+man_name+")");
                     break;
-                case MSG_DOWN_START:
-                    //mTipTv.setText("download start");
-                    break;
+//                case MSG_DOWN_START:
+//                    //mTipTv.setText("download start");
+//                    break;
             }
         };
     };
@@ -76,28 +103,39 @@ public class ListViewChatActivity extends AppCompatActivity {
         //mThreadPool = Executors.newCachedThreadPool();//初始化线程
 
         //获取信息
-        //Intent intent = getIntent();
-
-        //String ClientJsonData = intent.getStringExtra("client");
-        //String ListInfoJdonData = intent.getStringExtra("ListInfo");
-
-        //listInfo = new Gson().fromJson(ListInfoJdonData,ListInfo.class);
-
-
-//        let testString:String = "成都"
-//        let utf8String = (testString as NSString).UTF8String
-        new MyThread().start();
+        Intent intent = getIntent();
+        chat_id = intent.getStringExtra("chat_id");
+        chat_name = intent.getStringExtra("chat_name");
 
 
 
+        //initLists();//初始化联系人列表
+        new MyThread(mHandler).start();
+        if(listInfo == null){
+            Log.d(TAG, "onCreate: listInfo == null");
+            ListInfo listInfo2 = client_chatRoom.getListInfo();
+            if(listInfo2 != null){
+                listInfo = listInfo2;
+                String man_name1 = listInfo.getNickName().toString();
+                Integer man_uid2 = listInfo.getJKNum();
+                hostname = (TextView) findViewById(R.id.list_host_name);
+                hostname.setText("Hi  "+man_uid2+"("+man_name1+")");
+                Log.d(TAG, "onCreate: client_chatRoom.getListInfo()不为空");
+            }
+            //flushManList();
+        }
 
-        initLists();//初始化联系人列表
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list_recycler_view);
+
+
+        //initLists();
+        //flushManList();
+        recyclerView = (RecyclerView) findViewById(R.id.list_recycler_view);
         add_man = (ImageView) findViewById(R.id.add_man);
-
+        mess = (TextView) findViewById(R.id.xiaoxi);
+        friendList = (TextView) findViewById(R.id.haoyou);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        ListAdapter adapter = new ListAdapter(listList);
+        adapter = new ListAdapter(listList);
         recyclerView.setAdapter(adapter);
 
         add_man.setOnClickListener(new View.OnClickListener() {
@@ -116,7 +154,13 @@ public class ListViewChatActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         nickname = nickname_edit.getText().toString();
-
+                        int add_id = Integer.parseInt(nickname);  //注意输入不是数字的时候
+                        String list_name = "111";
+                        try {
+                            client_chatRoom.SendaddFriend(add_id, list_name);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                         Toast.makeText(ListViewChatActivity.this,nickname,Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -132,66 +176,127 @@ public class ListViewChatActivity extends AppCompatActivity {
 
         });
 
+        friendList.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                flushManList();
+                getManList();
+                friendList.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                mess.setBackgroundColor(Color.parseColor("#000000"));
+            }
+        });
+
+        mess.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getMess();
+                mess.setBackgroundColor(Color.parseColor("#FFFFFF"));
+                friendList.setBackgroundColor(Color.parseColor("#000000"));
+            }
+        });
+
 
         Log.d(TAG, "onCreate: list");
     }
-    private void initLists(){
-        ManList manList520=  new ManList("韩逸清",R.drawable.emotion_aixin);
-        listList.add(manList520);
-        ManList manList1=  new ManList("李益军",R.drawable.ic_launcher);
-        listList.add(manList1);
-        ManList manList2=  new ManList("符希健",R.drawable.ic_launcher);
-        listList.add(manList2);
-        ManList manList3=  new ManList("钱建刚",R.drawable.ic_launcher);
-        listList.add(manList3);
-        ManList manList4=  new ManList("甘延汉",R.drawable.ic_launcher);
-        listList.add(manList4);
-        ManList manList5=  new ManList("李恩晗",R.drawable.ic_launcher);
-        listList.add(manList5);
-        ManList manList6=  new ManList("李汉军",R.drawable.ic_launcher);
-        listList.add(manList6);
-        ManList manList7=  new ManList("冯姜瑶",R.drawable.ic_launcher);
-        listList.add(manList7);
-        ManList manList8=  new ManList("周元奇",R.drawable.ic_launcher);
-        listList.add(manList8);
-        ManList manList9=  new ManList("叶尔那尔·巴哈提",R.drawable.ic_launcher);
-        listList.add(manList9);
-        ManList manList10=  new ManList("进度款",R.drawable.ic_launcher);
-        listList.add(manList10);
-        ManList manList11=  new ManList("折戟沉沙",R.drawable.ic_launcher);
-        listList.add(manList11);
-        ManList manList12=  new ManList("时代峻峰的",R.drawable.ic_launcher);
-        listList.add(manList12);
-        ManList manList13=  new ManList("asdfs",R.drawable.ic_launcher);
-        listList.add(manList13);
-        ManList manList14=  new ManList("safddsf",R.drawable.ic_launcher);
-        listList.add(manList14);
 
+    private void initLists(){
+        listInfo = client_chatRoom.getListInfo();
+        Log.d(TAG, "initLists: 初始化好友列表");
+        //flushManList();
+        Log.d(TAG, "initLists: 初始化完成");
     }
 
-//    private Boolean getManList() throws IOException {
-//        listInfo.getListCount();
-//
-//         return false;
+
+    private void flushManList(){
+
+        int list_size = listList.size();
+        listList.clear();
+        adapter.notifyItemRangeRemoved(0,list_size);
+        byte listCount = listInfo.getListCount();// 保存有多少组好友
+        String ListName[] = listInfo.getListName();// 保存每个分组的名称
+        byte[] bodyCount = listInfo.getBodyCount();// 每组有多少个人
+        int bodyNum[][] = listInfo.getBodyNum();// 每个好友的JK号
+        int bodypic[][] = listInfo.getBodypic();//好友头像
+        String nikeName[][] = listInfo.getNikeName();// 每个好友的昵称
+        for(int i = 0;i < bodyNum.length;i++){
+            for(int j = 0;j < bodyNum[i].length;j++){//不同分组
+                ManList manList1=  new ManList(bodyNum[i][j],nikeName[i][j],R.drawable.ic_launcher);
+                listList.add(manList1);
+            }
+
+        }
+        list_size = listList.size();
+        //ListAdapter adapter = new ListAdapter(listList);
+        //recyclerView.setAdapter(adapter);
+        adapter.notifyItemRangeInserted(0,list_size);
+    }
+    private void getManList(){
+        ListAdapter adapter = new ListAdapter(listList);
+        recyclerView.setAdapter(adapter);
+    }
+    private void getMess(){
+        //listList.clear();
+        Log.d(TAG, "getMess: 消息列表长度："+list_mess.size());
+        ListAdapter adapter = new ListAdapter(list_mess);
+        recyclerView.setAdapter(adapter);
+//        adapter.notifyItemInserted(list_mess.size()- 1);
+//当有新消息时，刷新RecyclerView中的显示
+        //recyclerView.scrollToPosition(list_mess.size()- 1);
+    }
+    private void addMess(ManList manList1){
+        list_mess.add(manList1);
+        Log.d(TAG, "addMess: 添加消息列表");
+    }
+
+//    public void setChatIdAndName(String chat_id,String chat_name)
+//    {
+//        this.chat_id = chat_id;
+//        this.chat_name = chat_name;
 //    }
 
+
     class MyThread extends Thread {
+        private  Handler handler;
+        public MyThread(Handler handler){
+            this.handler = handler;
+        }
         @Override
         public void run() {
-            try {
+            //try {
                 Log.d(TAG, "run: 获取好友列表");
 
-                listInfo = client_chatRoom.getlist();
-                Message msg = new Message();
-                msg.what = MSG_DOWN_SUCCESS;
-                mHandler.sendMessage(msg);
+//                listInfo = client_chatRoom.getlist();
+//                Message msg = new Message();
+//                msg.what = MSG_DOWN_SUCCESS;
+
+                client_chatRoom.setHandler(handler);
                 client_chatRoom.start();
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+           // } catch (IOException e) {
+               // e.printStackTrace();
+            //}
             Log.d(TAG,"MyThread stop run");
         }
     }
+
+//        private void initLists(){
+//        ManList manList520=  new ManList(1314520,"韩逸清大美女",R.drawable.emotion_aixin);
+//        listList.add(manList520);
+//        ManList manList1=  new ManList(1314520,"我爱你",R.drawable.emotion_aixin);
+//        listList.add(manList1);
+//        ManList manList2=  new ManList(1314520,"一生",R.drawable.emotion_aixin);
+//        listList.add(manList2);
+//        ManList manList3=  new ManList(1314520,"一世",R.drawable.emotion_aixin);
+//        listList.add(manList3);
+//        ManList manList4=  new ManList(1314520,"执子",R.drawable.emotion_aixin);
+//        listList.add(manList4);
+//        ManList manList5=  new ManList(1314520,"之手",R.drawable.emotion_aixin);
+//        listList.add(manList5);
+//        ManList manList6=  new ManList(1314520,"与子",R.drawable.emotion_aixin);
+//        listList.add(manList6);
+//        ManList manList7=  new ManList(1314520,"偕老",R.drawable.emotion_aixin);
+//        listList.add(manList7);
+//
+//    }
 
 }

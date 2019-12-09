@@ -2,6 +2,7 @@ package com.hnu.hi;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -68,10 +69,16 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 firstClickTime = SystemClock.uptimeMillis();
                 int position = holder.getAdapterPosition();
                 ManList manList = mList.get(position);
-                String name = manList.getName();
+                String name = manList.getIdName();
                 Toast.makeText(context,"即将和"+name+"聊天",Toast.LENGTH_SHORT).show();
+//                Message message = new Message();
+//                message.what = 0x554;//添加消息列表
+//                message.obj = manList;
+
                 Intent intent = new Intent(context,MainActivity.class);
-                intent.putExtra("name",name);
+                //intent.putExtra("name",name);
+                intent.putExtra("chat_id",manList.getId().toString());
+                intent.putExtra("chat_name",manList.getName());
                 Log.d(TAG, "onClick: 启动聊天界面");
                 context.startActivity(intent);
 
@@ -84,7 +91,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         ManList list = mList.get(position);
         holder.listImage.setImageResource(list.getImageId());
-        holder.listName.setText(list.getName());
+        holder.listName.setText(list.getIdName());
     }
 
     @Override
