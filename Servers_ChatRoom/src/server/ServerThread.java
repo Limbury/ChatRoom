@@ -6,8 +6,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.List;
 
 import db.MsgPool;
+import db.RecordInfo;
+import db.RecordModi;
 import db.Server_id;
 import db.ThreadPool;
 import db.UserInfo;
@@ -219,7 +222,9 @@ public class ServerThread extends Thread {
             String msgText = mct.getMsgText();
 //			System.out.println("Sending Test!!");
 //			System.out.println("From "+from+" To "+to+" Text "+msgText);
-
+            RecordModi tmp = new RecordModi();
+            tmp.inserthistry(from, to, msgText);
+            tmp.inserthistry(to, from, msgText);
             if (!ChatTool.sendMsg(from, to, msgText)) {
                 System.out.println("SaveOnServer");
 
@@ -257,12 +262,17 @@ public class ServerThread extends Thread {
             sendFriendList();
 
             //send Add_JK Friend list
-            model.addFriend(own_jk, add_jk, list_name);
+            //model.addFriend(own_jk, add_jk, list_name);
             //给被添加者更新列表
             ServerThread st = ThreadPool.threadpool.get(String.valueOf(add_jk));
             if (st != null) {
                 st.sendFriendList();
             }
+        }
+        else if(msg.getType() == 0x06) {
+        	int uid1=msg.getSrc();
+        	int uid2=msg.getDest();
+        	sendhistory(uid1,uid2);
         }
     }
 	
@@ -270,4 +280,28 @@ public class ServerThread extends Thread {
         MsgChatText mct = new MsgChatText(from, userid, msg);
         mct.send(ous);
     }
+	
+	public void sendhistory(int uid1,int uid2){ //requst from uid1, he is looking uid2
+		RecordModi tmp = new RecordModi();
+		List<RecordInfo> a;
+		try {
+			a = tmp.getRecordByUID(uid1, uid2);
+			for(int i=0;i<a.size();i++) {
+				int from = a.get(i).getUid1();
+	            int to = a.get(i).getUid2();
+	            String msgText = a.get(i).getText();
+	            MsgChatText mct = new MsgChatText(from, to, msgText);
+	            mct.setType((byte) 0x66);
+	            mct.send(ous);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println("no more message");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println("send erro");
+		}
+	}
 }

@@ -52,6 +52,13 @@ public class Client_ChatRoom extends Thread {
 		return false;
 	}
 	
+	public void offline() {
+		try {
+			client.close();
+		}catch (IOException e) {
+			// e.printStackTrace();
+		}
+	}
 	/*
 	 * 接受服务器消息
 	*/	
@@ -62,7 +69,7 @@ public class Client_ChatRoom extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.out.println("与服务器断开连接");
-				JOptionPane.showMessageDialog(null, "与服务器断开连接", "ERROR", JOptionPane.ERROR_MESSAGE);
+				//JOptionPane.showMessageDialog(null, "与服务器断开连接", "ERROR", JOptionPane.ERROR_MESSAGE);
 				System.exit(0);
 			}
 		}
@@ -152,7 +159,7 @@ public class Client_ChatRoom extends Thread {
 			ListInfo list = packlist(recMsg);
 			//Figures.list.Refresh_List(list);
 		}
-		if (MsgType == 0x55){
+		else if (MsgType == 0x55){
 //			System.out.println("Here");
 			MsgAddFriendResp mafr = (MsgAddFriendResp) recMsg;
 			byte result = mafr.getState();
@@ -161,6 +168,13 @@ public class Client_ChatRoom extends Thread {
 //				System.out.println("To show Result");
 				Figures.afu.showResult(result);
 			}*/
+		}
+		else if (MsgType == 0x66) {
+			// is history record
+			MsgChatText mct = (MsgChatText) recMsg;
+			int from = mct.getSrc();
+			int to = mct.getDest();
+			String Msg = mct.getMsgText();
 		}
 	}
 	
@@ -209,7 +223,7 @@ public class Client_ChatRoom extends Thread {
 				 * 注册成功
 				 */
 				// System.out.println("注册的JK号为" + mrr.getDest());
-				JOptionPane.showMessageDialog(null, "注册成功\nJK码为" + mrr.getDest());
+				//JOptionPane.showMessageDialog(null, "注册成功\nJK码为" + mrr.getDest());
 				return true;
 			} else {
 				/*
@@ -293,6 +307,18 @@ public class Client_ChatRoom extends Thread {
 		byte[] sendMsg = PackageTool.packMsg(maf);
 		ous.write(sendMsg);
 		ous.flush();
+	}
+	/*
+	 * uid 1 is looking the record with uid 2
+	 */
+	public void GetRecord(int uid1, int uid2) {
+		MsgHead mh = new MsgHead();
+		int Totalen = 13;
+		byte type = 0x06;
+		mh.setTotalLen(Totalen);
+		mh.setType(type);
+		mh.setDest(uid2);
+		mh.setSrc(uid1);
 	}
 
 }
