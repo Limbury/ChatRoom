@@ -60,8 +60,8 @@ public class Client_ChatRoom extends Thread {
             synchronized (Client_ChatRoom.class){
                 if(client_chatRoom == null)
                     //client_chatRoom = new Client_ChatRoom("10.0.2.2",6666);
-                    //client_chatRoom = new Client_ChatRoom("175.10.207.234",6666);
-                    client_chatRoom = new Client_ChatRoom("192.168.43.233",6666);
+                    client_chatRoom = new Client_ChatRoom("175.10.207.234",6666);
+                    //client_chatRoom = new Client_ChatRoom("192.168.43.233",6666);
                     //client_chatRoom.start();
             }
         }

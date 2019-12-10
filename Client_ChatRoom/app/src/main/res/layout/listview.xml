@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/a112">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="horizontal"
         android:layout_weight="1"
-        android:background="@color/colorPrimary">
+        >
 
         <TextView
             android:id="@+id/list_host_name"
@@ -17,14 +18,14 @@
             android:gravity="left"
             android:layout_weight="9"
             android:text="Hi  Gol_Light"
-            android:textColor="@color/white"
+            android:textColor="@color/colorPrimary"
             android:textSize="24sp" />
 
         <ImageView
             android:id="@+id/add_man"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:background="@color/colorPrimary"
+
             android:layout_weight="1"
             android:src="@mipmap/ic_action_add"
             android:visibility="visible" />
