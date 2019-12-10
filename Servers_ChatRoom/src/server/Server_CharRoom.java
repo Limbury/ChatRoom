@@ -10,7 +10,7 @@ public class Server_CharRoom {
 	public void setupServer(int port) {
 		try {
 			server_chat = new ServerSocket(port);
-			System.out.println("服务器启动成功");
+			System.out.println("鍚姩鎴愬姛");
 			while (true) {
 				Socket client = server_chat.accept();
 				System.out.println("Incoming" + client.getRemoteSocketAddress());
@@ -25,7 +25,7 @@ public class Server_CharRoom {
 	public void closeServer() {
 		try {
 			server_chat.close();
-			System.out.println("服务器关闭成功");
+			System.out.println("鍏抽棴鎴愬姛");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -33,7 +33,7 @@ public class Server_CharRoom {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println("服务器测试");
+		System.out.println("寮�濮嬪惎鍔ㄦ湇鍔″櫒");
 		Server_CharRoom tmp = new Server_CharRoom();
 		tmp.setupServer(6666);
 		tmp.closeServer();

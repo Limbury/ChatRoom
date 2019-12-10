@@ -7,18 +7,18 @@ import msg.MsgHead;
 
 public class PackageTool {
 	/*
-	 * ÏòÁ÷¶ÔÏóÖÐÐ´Èë¹Ì¶¨³¤¶ÈµÄ×Ö·û´®
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´ï¿½ï¿½Ì¶ï¿½ï¿½ï¿½ï¿½Èµï¿½ï¿½Ö·ï¿½ï¿½ï¿½
 	 * 
-	 * @param dous Á÷¶ÔÏó
+	 * @param dous ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	 * 
-	 * @param len ×Ö½ÚµÄ³¤¶È
+	 * @param len ï¿½Ö½ÚµÄ³ï¿½ï¿½ï¿½
 	 * 
-	 * @param s Ð´ÈëµÄ×Ö·û´®
+	 * @param s Ð´ï¿½ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½
 	 */
 	private static void writeString(DataOutputStream dous, int len, String s) throws IOException {
 		byte[] data = s.getBytes();
 		if (data.length > len) {
-			throw new IOException("Ð´Èë³¤¶È³¬³¤");
+			throw new IOException("è¶…é•¿");
 		}
 		dous.write(data);
 		while (data.length < len) {
@@ -48,7 +48,7 @@ public class PackageTool {
 //		} else if (msgType == 0x03) {
 //			MsgTeamList mtl = (MsgTeamList) msg;
 //
-//			// ´ÓmtlÖÐ»ñÈ¡ÐÅÏ¢
+//			// ï¿½ï¿½mtlï¿½Ð»ï¿½È¡ï¿½ï¿½Ï¢
 //			String userName = mtl.getUserName();
 //			int pic = mtl.getPic();
 //			byte listCount = mtl.getListCount();
@@ -59,15 +59,15 @@ public class PackageTool {
 //			String nikeName[][] = mtl.getNikeName();
 //			byte bodyState[][] = mtl.getBodyState();
 //
-//			// ¿ªÊ¼Ð´ÈëÁ÷ÖÐ
+//			// ï¿½ï¿½Ê¼Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 //			int i, j;
 //			writeString(dous, 10, userName);
 //			dous.writeInt(pic);
-//			dous.write(listCount);// ·Ö×é¸öÊý
+//			dous.write(listCount);// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 //			for (i = 0; i < listCount; i++) {
 //				writeString(dous, 10, listName[i]);
 //				dous.write(bodyCount[i]);
-//				for (j = 0; j < bodyCount[i]; j++) {// Ã¿¸ö×éÀïÃæ
+//				for (j = 0; j < bodyCount[i]; j++) {// Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 //					//System.out.println(bodyNum[i][j]+" "+bodyPic[i][j]+" "+nikeName[i][j]);
 //					dous.writeInt(bodyNum[i][j]);
 //					dous.writeInt(bodyPic[i][j]);

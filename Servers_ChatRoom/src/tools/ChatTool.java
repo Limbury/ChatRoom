@@ -9,9 +9,9 @@ import server.ServerThread;
 
 public class ChatTool {
 	/*
-	 * Õâ¸ö·½·¨ÓÃÀ´ÏòUIDµÄÓÃ»§·¢ËÍÄÚÈİÎªMsgµÄĞÅÏ¢
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½UIDï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªMsgï¿½ï¿½ï¿½ï¿½Ï¢
 	 * 
-	 * @return ÊÇ·ñ³É¹¦·¢ËÍ
+	 * @return ï¿½Ç·ï¿½É¹ï¿½ï¿½ï¿½ï¿½ï¿½
 	 */
 	public static boolean sendMsg(int from,int to, String msg) {
 		/*
@@ -20,12 +20,12 @@ public class ChatTool {
 		
 		
 		/*
-		 * ÏòÓÃ»§·¢ËÍĞÅÏ¢
+		 * ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 		 */
 		ServerThread st = ThreadPool.threadpool.get(String.valueOf(to));
 		
 		if(st == null ) {
-			System.out.println("Ä¿±ê²»ÔÚÏß");
+			System.out.println("ç›®æ ‡ä¸åœ¨çº¿");
 			return false;
 		}
 		
@@ -42,7 +42,7 @@ public class ChatTool {
 	}
 
 	/*
-	 * Õâ¸ö·½·¨ÓÉÓÚJKNumµÄÓÃ»§²»ÔÚÏß ±£´æÏòJKNumµÄÓÃ»§·¢ËÍÄÚÈİÎªMsgµÄĞÅÏ¢
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½JKNumï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½JKNumï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªMsgï¿½ï¿½ï¿½ï¿½Ï¢
 	 */
 	public static void saveOnServer(int from,int to, String Msg) {
 		MsgChatText mct = new MsgChatText(from, to, Msg);

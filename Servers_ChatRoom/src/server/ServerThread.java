@@ -30,10 +30,10 @@ import tools.ThreadRegDelTool;
 
 public class ServerThread extends Thread {
 	public boolean isSending = false;	//
-    private Socket client;	//ÍøÂç½Ó¿Ú	
-    private OutputStream ous;	//Êä³öÁ÷
-    private int userid;		//Î¨Ò»±êÊ¶
-    private boolean isOnline = false;	//ÊÇ·ñÔÚÏß
+    private Socket client;	//ï¿½ï¿½ï¿½ï¿½Ó¿ï¿½	
+    private OutputStream ous;	//ï¿½ï¿½ï¿½ï¿½ï¿½
+    private int userid;		//Î¨Ò»ï¿½ï¿½Ê¶
+    private boolean isOnline = false;	//ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½
 	
 	public ServerThread(Socket client) {
 	        this.client = client;
@@ -43,20 +43,20 @@ public class ServerThread extends Thread {
         return userid;
     }
 	/*
-	 * Æô¶¯Ïß³Ì
+	 * ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½
 	 * (non-Javadoc)
 	 * @see java.lang.Thread#run()
 	 */
 	public void run() {
-        while (!isOnline) { // ¸ÃÏß³ÌÖĞ¿Í»§¶ËÎ´µÇÂ½
+        while (!isOnline) { // ï¿½ï¿½ï¿½ß³ï¿½ï¿½Ğ¿Í»ï¿½ï¿½ï¿½Î´ï¿½ï¿½Â½
             try {
                 processLogin();
             } catch (Exception e) {
 
 				/*
-                 * ¿Í»§¶Ë¶Ï¿ªÁ¬½Ó
+                 * ï¿½Í»ï¿½ï¿½Ë¶Ï¿ï¿½ï¿½ï¿½ï¿½ï¿½
 				 */
-                System.out.println(client.getRemoteSocketAddress() + "ÒÑ¶Ï¿ª");
+                System.out.println(client.getRemoteSocketAddress() + "ï¿½Ñ¶Ï¿ï¿½");
                 isOnline = false;
 
                 try {
@@ -67,16 +67,16 @@ public class ServerThread extends Thread {
                 break;
             }
         }
-        while (isOnline) { // ¸ÃÏß³ÌÖĞ¿Í»§¶ËÒÑµÇÂ½
-            //¿ªÊ¼¸üĞÂÁĞ±í
+        while (isOnline) { // ï¿½ï¿½ï¿½ß³ï¿½ï¿½Ğ¿Í»ï¿½ï¿½ï¿½ï¿½Ñµï¿½Â½
+            //ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
             try {
                 processChat();
             } catch (Exception e) {
 				/*
-				 * ¿Í»§¶Ë¶Ï¿ªÁ¬½Ó
+				 * ï¿½Í»ï¿½ï¿½Ë¶Ï¿ï¿½ï¿½ï¿½ï¿½ï¿½
 				 */
-                System.out.println(client.getRemoteSocketAddress() + "ÒÑ¶Ï¿ª");
-                ThreadRegDelTool.DelThread(userid);// ´ÓÏß³ÌÊı¾İ¿âÖĞ¼äÉ¾³ıÕâÌõĞÅÏ¢
+                System.out.println(client.getRemoteSocketAddress() + "æ–­å¼€");
+                ThreadRegDelTool.DelThread(userid);// ï¿½ï¿½ï¿½ß³ï¿½ï¿½ï¿½ï¿½İ¿ï¿½ï¿½Ğ¼ï¿½É¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
                 isOnline = false;
                 try {
                     broadcastState();
@@ -95,7 +95,7 @@ public class ServerThread extends Thread {
     }
 	
 	/*
-	 * ¿Í»§¶ËµÇÂ¼ÉÏÏß
+	 * ï¿½Í»ï¿½ï¿½Ëµï¿½Â¼ï¿½ï¿½ï¿½ï¿½
 	 */
 	private void processLogin() throws Exception {
         //connect to DataBase
@@ -108,61 +108,61 @@ public class ServerThread extends Thread {
         MsgHead msg = MsgHead.readMessageFromStream(dis);
 
 		/*
-		 * ÏÂÃæÊÇÕë¶Ô²»Í¬µÄĞÅÏ¢½øĞĞ´¦Àí
+		 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô²ï¿½Í¬ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½Ğ´ï¿½ï¿½ï¿½
 		 */
 
-        // Èç¹û´«¹ıÀ´µÄÊÇ×¢²áĞÅÏ¢
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½Ï¢
         if (msg.getType() == 0x01) {
             MsgReg mr = (MsgReg) msg;
 
-            // ×¢²áÓÃ»§
+            // ×¢ï¿½ï¿½ï¿½Ã»ï¿½
 
             UserInfo newUser = model.createUser(mr.getPwd(), mr.getNikeName(), 1);
             int newuid = newUser.getUID();
 
 			/*
-			 * ·şÎñÆ÷×¼±¸·µ»ØĞÅÏ¢
+			 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 			 */
             byte state = 0;
             MsgRegResp mrr = new MsgRegResp(newuid, state);
             mrr.send(ous);
         }
 
-        // Èç¹û´«¹ıÀ´ÊÇµÇÂ½ĞÅÏ¢
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Çµï¿½Â½ï¿½ï¿½Ï¢
         else if (msg.getType() == 0x02) {
             MsgLogin ml = (MsgLogin) msg;
 
-            byte checkmsg;// ÓÃÀ´±£´æ×´Ì¬ĞÅÏ¢
-            if (ThreadPool.threadpool.containsKey(String.valueOf(ml.getSrc()))) {//ÒÑ¾­ÔÚÏßÁË
+            byte checkmsg;// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ï¢
+            if (ThreadPool.threadpool.containsKey(String.valueOf(ml.getSrc()))) {//ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 checkmsg = 2;
-            } else if (model.userAuthorization(ml.getSrc(), ml.getPwd())) {// Èç¹ûÑéÖ¤ÁËÓÃ»§´æÔÚ
+            } else if (model.userAuthorization(ml.getSrc(), ml.getPwd())) {// ï¿½ï¿½ï¿½ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½
                 checkmsg = 0;
             } else {
                 checkmsg = 1;
             }
 
 			/*
-			 * ·şÎñÆ÷×¼±¸·µ»ØĞÅÏ¢
+			 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 			 */
             MsgLoginResp mlr = new MsgLoginResp(checkmsg);
             mlr.send(ous);
 
 			/*
-			 * Èç¹ûµÇÂ½²Ù×÷Íê³É£¬ ·¢ËÍºÃÓÑÁĞ±í
+			 * ï¿½ï¿½ï¿½ï¿½ï¿½Â½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É£ï¿½ ï¿½ï¿½ï¿½Íºï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
 			 */
             if (checkmsg == 0) {
                 userid = ml.getSrc();
-                ThreadRegDelTool.RegThread(this); // ÏòÏß³ÌÊı¾İ¿âÖĞ×¢²áÕâ¸öÏß³Ì
+                ThreadRegDelTool.RegThread(this); // ï¿½ï¿½ï¿½ß³ï¿½ï¿½ï¿½ï¿½İ¿ï¿½ï¿½ï¿½×¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß³ï¿½
                 sendFriendList();
                 sendUnacessMsg();
-                isOnline = true;// ÉèÖÃÒÑµÇÂ¼¿Í»§¶Ë
+                isOnline = true;// ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½Â¼ï¿½Í»ï¿½ï¿½ï¿½
                 broadcastState();
             }
 
         }
     }
 	/*
-	 * ¸üĞÂºÃÓÑÁĞ±íÖĞ±¾ÈË×´Ì¬
+	 * ï¿½ï¿½ï¿½Âºï¿½ï¿½ï¿½ï¿½Ğ±ï¿½ï¿½Ğ±ï¿½ï¿½ï¿½×´Ì¬
 	 */
 	private void broadcastState() throws SQLException, IOException {
         UserModi model = new UserModi();
@@ -178,7 +178,7 @@ public class ServerThread extends Thread {
     }
 	
 	private void sendFriendList() throws IOException, SQLException {
-        System.out.println("·¢ËÍºÃÓÑÁĞ±í");
+        System.out.println("å‘é€å¥½å‹åˆ—è¡¨");
 
        
         UserModi model = new UserModi();
@@ -188,7 +188,7 @@ public class ServerThread extends Thread {
     }
 	
 	private void sendUnacessMsg() throws IOException, SQLException {
-        System.out.println("·¢ËÍ²»ÔÚÏßÊ±ÏûÏ¢");
+        System.out.println("ä¸Šçº¿æ‹‰å–æœªæ¥å—æ¶ˆæ¯");
         for(int i=0;i<MsgPool.msgpool.size();i++) {
         	MsgChatText mct=MsgPool.msgpool.get(i);
         	if(mct.getDest() == userid) {
@@ -209,13 +209,13 @@ public class ServerThread extends Thread {
         int totalLen = dis.readInt();
         byte[] data = new byte[totalLen - 4];
         dis.readFully(data);
-        MsgHead msg = ParseTool.parseMsg(data);// ½â°ü¸ÃĞÅÏ¢
+        MsgHead msg = ParseTool.parseMsg(data);// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
 
 		/*
-		 * ÏÂÃæÊÇÕë¶Ô²»Í¬µÄĞÅÏ¢½øĞĞ´¦Àí
+		 * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô²ï¿½Í¬ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½Ğ´ï¿½ï¿½ï¿½
 		 */
 
-        if (msg.getType() == 0x04) {//Èç¹ûÊÕµ½µÄÊÇ·¢ËÍĞÅÏ¢ÇëÇó
+        if (msg.getType() == 0x04) {//ï¿½ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½
             MsgChatText mct = (MsgChatText) msg;
             int from = mct.getSrc();
             int to = mct.getDest();
@@ -228,10 +228,10 @@ public class ServerThread extends Thread {
             if (!ChatTool.sendMsg(from, to, msgText)) {
                 System.out.println("SaveOnServer");
 
-                //±£´æµ½·şÎñÆ÷ÉÏ
+                //ï¿½ï¿½ï¿½æµ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 ChatTool.saveOnServer(from, to, msgText);
             }
-        } else if (msg.getType() == 0x05) {//Èç¹ûÊÜµ½Ìí¼ÓºÃÓÑµÄÇëÇó
+        } else if (msg.getType() == 0x05) {//ï¿½ï¿½ï¿½ï¿½Üµï¿½ï¿½ï¿½Óºï¿½ï¿½Ñµï¿½ï¿½ï¿½ï¿½ï¿½
             System.out.println("Add friend request");
             MsgAddFriend maf = (MsgAddFriend) msg;
             int own_jk = maf.getSrc();
@@ -246,15 +246,15 @@ public class ServerThread extends Thread {
             mafr.setTotalLen(14);
             mafr.setType((byte) 0x55);
             if (result == 0) {//success
-                model.addFriend(own_jk, add_jk, "ĞÂÌí¼ÓºÃÓÑ");
+                model.addFriend(own_jk, add_jk, "newfriend");
                 //send add_jk new list
                 mafr.setState((byte) 0);
                 //send own_jk new list
-            } else if (result == 1) {//²»´æÔÚÕâ¸öÈË
+            } else if (result == 1) {//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 mafr.setState((byte) 1);
-            } else if (result == 2) {//Èç¹ûÒÑ¾­´æÔÚÁËÕâ¸öÈË
+            } else if (result == 2) {//ï¿½ï¿½ï¿½ï¿½Ñ¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 mafr.setState((byte) 2);
-            } else if (result == 3) {//´´½¨ÁĞ±íÊ§°Ü
+            } else if (result == 3) {//ï¿½ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½Ê§ï¿½ï¿½
                 mafr.setState((byte) 3);
             }
             mafr.send(ous);
@@ -263,7 +263,7 @@ public class ServerThread extends Thread {
 
             //send Add_JK Friend list
             //model.addFriend(own_jk, add_jk, list_name);
-            //¸ø±»Ìí¼ÓÕß¸üĞÂÁĞ±í
+            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¸ï¿½ï¿½ï¿½ï¿½Ğ±ï¿½
             ServerThread st = ThreadPool.threadpool.get(String.valueOf(add_jk));
             if (st != null) {
                 st.sendFriendList();

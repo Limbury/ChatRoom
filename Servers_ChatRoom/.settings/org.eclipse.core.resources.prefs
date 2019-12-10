@@ -1,2 +1,6 @@
 eclipse.preferences.version=1
 encoding//src/db/RecordModi.java=UTF-8
+encoding//src/server/ServerThread.java=UTF-8
+encoding//src/server/Server_CharRoom.java=UTF-8
+encoding//src/tools/ChatTool.java=UTF-8
+encoding//src/tools/PackageTool.java=UTF-8
