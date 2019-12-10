@@ -62,6 +62,8 @@ public class Client_ChatRoom extends Thread {
                     //client_chatRoom = new Client_ChatRoom("10.0.2.2",6666);
                     client_chatRoom = new Client_ChatRoom("175.10.207.234",6666);
                     //client_chatRoom = new Client_ChatRoom("192.168.43.233",6666);
+                    //client_chatRoom = new Client_ChatRoom("10.68.129.60",6666);
+                    //client_chatRoom = new Client_ChatRoom("192.168.43.233",6666);
                     //client_chatRoom.start();
             }
         }
@@ -77,6 +79,10 @@ public class Client_ChatRoom extends Thread {
     }
 
     public Integer getOwnJKNum(){return OwnJKNum;}
+
+    public void setOwnJKNum(Integer jkNum){
+        OwnJKNum = jkNum;
+    }
 
     public ListInfo getListInfo(){return listInfo;}
 
@@ -312,6 +318,7 @@ public class Client_ChatRoom extends Thread {
                 // System.out.println("注册的JK号为" + mrr.getDest());
                 Log.d(TAG, "Reg: 注册的JK号为" + mrr.getDest());
                 //JOptionPane.showMessageDialog(null, "注册成功\nJK码为" + mrr.getDest());
+                setOwnJKNum(mrr.getDest());
                 return mrr.getDest();
             } else {
                 /*

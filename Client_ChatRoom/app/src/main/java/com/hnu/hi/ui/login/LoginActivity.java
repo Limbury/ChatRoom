@@ -38,13 +38,24 @@ public class LoginActivity extends AppCompatActivity {
 
     private LoginViewModel loginViewModel;
     private static final String TAG = "LoginActivity";
+    private Client_ChatRoom client_chatRoom = Client_ChatRoom.getClient_chatRoom();
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        final EditText usernameEditText = findViewById(R.id.username);
+        String uid = client_chatRoom.getOwnJKNum().toString();
+        Log.d(TAG, "onStart: "+uid);
+        usernameEditText.setText(uid);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Intent intent = getIntent();
-        String uid = intent.getStringExtra("uid");
+//        Intent intent = getIntent();
+//        String uid = intent.getStringExtra("uid");
 
         loginViewModel = ViewModelProviders.of(this, new LoginViewModelFactory())
                 .get(LoginViewModel.class);
@@ -58,9 +69,9 @@ public class LoginActivity extends AppCompatActivity {
         final ProgressBar loadingProgressBar = findViewById(R.id.loading);
         final Button regButton = findViewById(R.id.registerButton);
 
-        if(uid != null){
-            usernameEditText.setText(uid);
-        }
+//        if(uid != null){
+//            usernameEditText.setText(uid);
+//        }
 
 
         loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {

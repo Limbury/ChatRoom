@@ -86,10 +86,12 @@ public class RegActivity extends AppCompatActivity {
                    Integer reg = client_chatRoom.Reg(reg_usernameEditText.getText().toString(),reg_passwordEditText.getText().toString());
                     if(reg > 0){
                         Toast.makeText(RegActivity.this,"注册成功",Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(RegActivity.this, LoginActivity.class);
-                        intent.putExtra("uid",reg.toString());
+//                        Intent intent = new Intent(RegActivity.this, LoginActivity.class);
+//                        intent.putExtra("uid",reg.toString());
                         Log.d(TAG, "onClick: 返回登陆界面列表");
-                        startActivity(intent);
+//                        setResult(111,intent);
+                        //startActivity(intent);
+                        finish();
                     }
                 }
                 else {

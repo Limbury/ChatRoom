@@ -220,6 +220,7 @@ class MainActivity extends AppCompatActivity {
     class MyThreadRead extends Thread {
         private Handler handler;
         private String from;
+        private String own;
         private String chatText_read;
         private String isrec;
         public MyThreadRead(Handler handler) {
@@ -244,6 +245,10 @@ class MainActivity extends AppCompatActivity {
                     while ((line = buffreader.readLine()) != null) {
                         StringTokenizer st= new StringTokenizer(line,"*");
                         if(st.hasMoreTokens()) {
+                            own = st.nextToken();
+                            Log.d(TAG, "run: from"+own);
+                        }
+                        if(st.hasMoreTokens()) {
                             from = st.nextToken();
                             Log.d(TAG, "run: from"+from);
                         }
@@ -255,8 +260,8 @@ class MainActivity extends AppCompatActivity {
                             chatText_read = st.nextToken();
                             Log.d(TAG, "run: chattext_read："+chatText_read);
                         }
-                        if(from != null && isrec != null && chatText_read != null){
-                            if(from.equals(chat_id)){
+                        if(own != null && from != null && isrec != null && chatText_read != null){
+                            if(own.equals(client_chatRoom.getOwnJKNum().toString()) && from.equals(chat_id)){
                                 Log.d(TAG, "run: 找到聊天记录");
                                     Message message = new Message();
                                     message.what = 0x123;
@@ -302,7 +307,7 @@ class MainActivity extends AppCompatActivity {
                 }
                 RandomAccessFile raf = new RandomAccessFile(file1, "rwd");
                 raf.seek(file1.length());
-                raf.write((from.toString()+"*"+isrec+"*"+chatText+"\r\n").getBytes());
+                raf.write((client_chatRoom.getOwnJKNum().toString()+"*"+from.toString()+"*"+isrec+"*"+chatText+"\r\n").getBytes());
                 raf.close();
 //                    FileOutputStream out = openFileOutput("mess_info.txt", MODE_PRIVATE);
 //                    out.write((from.toString()+"*"+"1"+"*"+chatText+"\r\n").getBytes());

@@ -353,7 +353,7 @@ public class ListViewChatActivity extends AppCompatActivity {
                     }
                     RandomAccessFile raf = new RandomAccessFile(file1, "rwd");
                     raf.seek(file1.length());
-                    raf.write((from.toString()+"*"+"1"+"*"+chatText+"\r\n").getBytes());
+                    raf.write((client_chatRoom.getOwnJKNum().toString()+"*"+from.toString()+"*"+"1"+"*"+chatText+"\r\n").getBytes());
                     raf.close();
 //                    FileOutputStream out = openFileOutput("mess_info.txt", MODE_PRIVATE);
 //                    out.write((from.toString()+"*"+"1"+"*"+chatText+"\r\n").getBytes());
