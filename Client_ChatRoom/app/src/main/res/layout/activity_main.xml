@@ -11,14 +11,14 @@
         android:layout_height="40dp"
         android:background="@color/divider_line">
 
-        <ImageView
-            android:id="@+id/back"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@color/white"
-            android:visibility="visible"
-            app:srcCompat="?attr/actionModeCloseDrawable"
-            tools:visibility="visible" />
+<!--        <ImageView-->
+<!--            android:id="@+id/back"-->
+<!--            android:layout_width="40dp"-->
+<!--            android:layout_height="40dp"-->
+<!--            android:background="@color/white"-->
+<!--            android:visibility="visible"-->
+<!--            app:srcCompat="?attr/actionModeCloseDrawable"-->
+<!--            tools:visibility="visible" />-->
         <TextView
             android:id="@+id/linkman_name"
             android:layout_width="match_parent"

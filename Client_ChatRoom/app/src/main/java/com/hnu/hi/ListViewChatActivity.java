@@ -19,12 +19,23 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.hnu.hi.client.Client_ChatRoom;
 import com.hnu.hi.data.ListInfo;
+import com.hnu.hi.tools.FSearchTool;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -35,9 +46,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class ListViewChatActivity extends AppCompatActivity {
     private List<ManList> listList = new ArrayList<>();
+    //private Set<ManList>  list_mess = new TreeSet<>();
+    private Map<Integer,ManList> listmap = new HashMap<Integer,ManList>();
+    private Map<Integer,ManList> messmap = new HashMap<Integer,ManList>();
     private List<ManList> list_mess = new ArrayList<>();
     private RecyclerView recyclerView;
-    private ListAdapter adapter;
+    private ListAdapter adapter_friend = new ListAdapter(listList);
+    private ListAdapter adapter_mess = new ListAdapter(list_mess);
     private static final String TAG = "ListViewChatActivity";
     TextView hostname;
     ImageView add_man;
@@ -53,6 +68,7 @@ public class ListViewChatActivity extends AppCompatActivity {
     private Client_ChatRoom client_chatRoom = Client_ChatRoom.getClient_chatRoom();
     private ListInfo listInfo;
     private ExecutorService mThreadPool;
+    private MyThread myThread;
     public final int MSG_DOWN_FAIL = 1;
     public final int MSG_DOWN_SUCCESS = 2;
     public final int MSG_DOWN_START = 3;
@@ -67,6 +83,7 @@ public class ListViewChatActivity extends AppCompatActivity {
                     hostname = (TextView) findViewById(R.id.list_host_name);
                     hostname.setText("Hi  "+man_uid2+"("+man_name1+")");
                     flushManList();
+                    Log.d(TAG, "handleMessage: 0x03 刷新列表");
                     break;
                 case 0x554:
                     addMess((ManList) msg.obj);
@@ -80,18 +97,43 @@ public class ListViewChatActivity extends AppCompatActivity {
                         Toast.makeText(ListViewChatActivity.this,"添加好友失败",Toast.LENGTH_LONG).show();
                     }
                     break;
-                case MSG_DOWN_SUCCESS:
-                    String man_name = listInfo.getNickName().toString();
-                    Integer man_uid = listInfo.getJKNum();
-                    hostname = (TextView) findViewById(R.id.list_host_name);
-                    hostname.setText("Hi  "+man_uid+"("+man_name+")");
+                case 0x04:
+                    String Msg = (String) msg.obj;
+                    final Integer uid_from = msg.arg1;
+                    Log.d(TAG, "handleMessage: 0x04 "+uid_from+" "+Msg);
+                    ManList mess_man_list = listmap.get(uid_from);
+                    if(mess_man_list != null){
+                        addMess(mess_man_list);
+                        Log.d(TAG, "handleMessage: 0x04 "+mess_man_list);
+                    }
+                    else {
+                        Log.d(TAG, "handleMessage: 0x04 该用户不是好友 添加失败");
+                    }
+                    new MyThreadSave(mHandler,uid_from,Msg).start();
+                    getMess();
                     break;
-//                case MSG_DOWN_START:
-//                    //mTipTv.setText("download start");
-//                    break;
             }
         };
     };
+
+    /**
+     * Take care of popping the fragment back stack or finishing the activity
+     * as appropriate.
+     */
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        client_chatRoom.disConnectServer();
+        //client_chatRoom.c
+        finish();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        client_chatRoom.setHandler(mHandler);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,7 +152,8 @@ public class ListViewChatActivity extends AppCompatActivity {
 
 
         //initLists();//初始化联系人列表
-        new MyThread(mHandler).start();
+        myThread = new MyThread(mHandler);
+        myThread.start();
         if(listInfo == null){
             Log.d(TAG, "onCreate: listInfo == null");
             ListInfo listInfo2 = client_chatRoom.getListInfo();
@@ -135,8 +178,8 @@ public class ListViewChatActivity extends AppCompatActivity {
         friendList = (TextView) findViewById(R.id.haoyou);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        adapter = new ListAdapter(listList);
-        recyclerView.setAdapter(adapter);
+        //adapter = new ListAdapter(listList);
+        recyclerView.setAdapter(adapter_friend);
 
         add_man.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -181,8 +224,7 @@ public class ListViewChatActivity extends AppCompatActivity {
             public void onClick(View v) {
                 flushManList();
                 getManList();
-                friendList.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                mess.setBackgroundColor(Color.parseColor("#000000"));
+
             }
         });
 
@@ -190,8 +232,7 @@ public class ListViewChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 getMess();
-                mess.setBackgroundColor(Color.parseColor("#FFFFFF"));
-                friendList.setBackgroundColor(Color.parseColor("#000000"));
+
             }
         });
 
@@ -211,7 +252,7 @@ public class ListViewChatActivity extends AppCompatActivity {
 
         int list_size = listList.size();
         listList.clear();
-        adapter.notifyItemRangeRemoved(0,list_size);
+        adapter_friend.notifyItemRangeRemoved(0,list_size);
         byte listCount = listInfo.getListCount();// 保存有多少组好友
         String ListName[] = listInfo.getListName();// 保存每个分组的名称
         byte[] bodyCount = listInfo.getBodyCount();// 每组有多少个人
@@ -222,37 +263,47 @@ public class ListViewChatActivity extends AppCompatActivity {
             for(int j = 0;j < bodyNum[i].length;j++){//不同分组
                 ManList manList1=  new ManList(bodyNum[i][j],nikeName[i][j],R.drawable.ic_launcher);
                 listList.add(manList1);
+                listmap.put(manList1.getId(),manList1);
             }
 
         }
         list_size = listList.size();
         //ListAdapter adapter = new ListAdapter(listList);
         //recyclerView.setAdapter(adapter);
-        adapter.notifyItemRangeInserted(0,list_size);
+        adapter_friend.notifyItemRangeInserted(0,list_size);
     }
     private void getManList(){
-        ListAdapter adapter = new ListAdapter(listList);
-        recyclerView.setAdapter(adapter);
+        //ListAdapter adapter = new ListAdapter(listList);
+        recyclerView.setAdapter(adapter_friend);
+        friendList.setBackgroundColor(Color.parseColor("#FFFFFF"));
+        mess.setBackgroundColor(Color.parseColor("#000000"));
     }
     private void getMess(){
         //listList.clear();
         Log.d(TAG, "getMess: 消息列表长度："+list_mess.size());
-        ListAdapter adapter = new ListAdapter(list_mess);
-        recyclerView.setAdapter(adapter);
+        //ListAdapter adapter = new ListAdapter(list_mess);
+        recyclerView.setAdapter(adapter_mess);
+        mess.setBackgroundColor(Color.parseColor("#FFFFFF"));
+        friendList.setBackgroundColor(Color.parseColor("#000000"));
 //        adapter.notifyItemInserted(list_mess.size()- 1);
 //当有新消息时，刷新RecyclerView中的显示
         //recyclerView.scrollToPosition(list_mess.size()- 1);
     }
     private void addMess(ManList manList1){
-        list_mess.add(manList1);
-        Log.d(TAG, "addMess: 添加消息列表");
+        ManList mess_man_list = messmap.get(manList1.getId());
+        if(mess_man_list == null){
+            messmap.put(manList1.getId(),manList1);
+            list_mess.add(manList1);
+            adapter_mess.notifyItemInserted(list_mess.size()- 1);
+            Log.d(TAG, "addMess: 成功添加消息列表");
+        }
+        else {
+            Log.d(TAG, "addMess: 添加消息列表失败，联系人已存在");
+        }
+
+
     }
 
-//    public void setChatIdAndName(String chat_id,String chat_name)
-//    {
-//        this.chat_id = chat_id;
-//        this.chat_name = chat_name;
-//    }
 
 
     class MyThread extends Thread {
@@ -262,7 +313,7 @@ public class ListViewChatActivity extends AppCompatActivity {
         }
         @Override
         public void run() {
-            //try {
+            try {
                 Log.d(TAG, "run: 获取好友列表");
 
 //                listInfo = client_chatRoom.getlist();
@@ -270,12 +321,53 @@ public class ListViewChatActivity extends AppCompatActivity {
 //                msg.what = MSG_DOWN_SUCCESS;
 
                 client_chatRoom.setHandler(handler);
-                client_chatRoom.start();
+                //flushManList();
+                client_chatRoom.runWithException();
 
-           // } catch (IOException e) {
-               // e.printStackTrace();
-            //}
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             Log.d(TAG,"MyThread stop run");
+        }
+    }
+    class MyThreadSave extends Thread {
+        private Handler handler;
+        private Integer from;
+        private String chatText;
+        public MyThreadSave(Handler handler,Integer from,String chatText) {
+            this.handler = handler;
+            this.from = from;
+            this.chatText = chatText;
+        }
+
+        @Override
+        public void run() {
+                Log.d(TAG, "run: 保存聊天记录");
+            File dir1 = getDir("abc", MODE_PRIVATE);
+            File file1 = new File(dir1, "mess_info.txt");
+
+            Log.d(TAG, "getDir"+dir1.toString());
+                try {
+                    if(!file1.exists()){
+                        file1.createNewFile();
+                    }
+                    RandomAccessFile raf = new RandomAccessFile(file1, "rwd");
+                    raf.seek(file1.length());
+                    raf.write((from.toString()+"*"+"1"+"*"+chatText+"\r\n").getBytes());
+                    raf.close();
+//                    FileOutputStream out = openFileOutput("mess_info.txt", MODE_PRIVATE);
+//                    out.write((from.toString()+"*"+"1"+"*"+chatText+"\r\n").getBytes());
+//                    Log.d(TAG, "run: 写入成功");
+//                    out.flush();
+//                    out.close();
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "run: 文件不存在");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "run: IOE");
+                }
+            Log.d(TAG, "MyThreadSave stop run");
         }
     }
 

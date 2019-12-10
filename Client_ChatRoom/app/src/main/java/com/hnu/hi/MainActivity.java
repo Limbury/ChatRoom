@@ -15,13 +15,24 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.hnu.hi.client.Client_ChatRoom;
 import com.hnu.hi.data.ListInfo;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
@@ -29,7 +40,7 @@ public
 class MainActivity extends AppCompatActivity {
     private EditText inputText;
     private ImageView send;
-    private ImageView back;
+    //private ImageView back;
     private TextView nameview;
     private RecyclerView msgRecyclerView;
     private MsgAdapter adapter;
@@ -52,6 +63,27 @@ class MainActivity extends AppCompatActivity {
 //当有新消息时，刷新RecyclerView中的显示
                     msgRecyclerView.scrollToPosition(msgList.size()- 1);
 //将RecyclerView定位到最后一行
+
+                    break;
+                case 0x123:
+                    Log.d(TAG, "handleMessage: 0x123");
+                    String text = (String) msg.obj;
+                    Integer isrecc = msg.arg1;
+                    if(isrecc == 1){
+                        Msg msg2 =  new Msg(text,Msg.type_received);
+                        msgList.add(msg2);
+                        adapter.notifyItemInserted(msgList.size()- 1);
+                        msgRecyclerView.scrollToPosition(msgList.size()- 1);
+//将RecyclerView定位到最后一行
+                        Log.d(TAG, "handleMessage: 0x123 更新消息");
+                    }
+                    else {
+                        Msg msg2 =  new Msg(text,Msg.type_sent);
+                        msgList.add(msg2);
+                        adapter.notifyItemInserted(msgList.size()- 1);
+                        msgRecyclerView.scrollToPosition(msgList.size()- 1);
+                        Log.d(TAG, "handleMessage: 0想23 更新发送消息");
+                    }
                     break;
             }
         }
@@ -72,6 +104,7 @@ class MainActivity extends AppCompatActivity {
                         adapter.notifyItemInserted(msgList.size()- 1);
 //当有新消息时，刷新RecyclerView中的显示
                         msgRecyclerView.scrollToPosition(msgList.size()- 1);
+                        new MyThreadSave(sendHandler,Integer.parseInt(chat_id),chatText,"1").start();
                     }
 
                     break;
@@ -92,10 +125,10 @@ class MainActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate: Talking");
 
         new MyRecThread(recHandler).start();
-
+        new MyThreadRead(sendHandler).start();
         inputText= (EditText) findViewById(R.id.input_text);
         send= (ImageView) findViewById(R.id.send_image);
-        back= (ImageView) findViewById(R.id.back);
+        //back= (ImageView) findViewById(R.id.back);
         nameview = (TextView) findViewById(R.id.linkman_name);
         nameview.setText(man_name);//设置联系人名字
         //initMsgs();        //初始化消息数据，应该改成同步消息
@@ -114,20 +147,21 @@ class MainActivity extends AppCompatActivity {
 
 //清空输入框的内容
                  new MySendThread(sendHandler).start();
-
+                 new MyThreadSave(sendHandler,Integer.parseInt(chat_id),content,"0").start();
                 }
             }
         });
-        back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                Intent intent = new Intent(MainActivity.this,ListViewChatActivity.class);
-//                intent.putExtra("chat_id",chat_id);
-//                intent.putExtra("chat_name",chat_name);
-//                startActivity(intent);
-                finish();
-            }
-        });
+//        back.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+////                Intent intent = new Intent(MainActivity.this,ListViewChatActivity.class);
+////                intent.putExtra("chat_id",chat_id);
+////                intent.putExtra("chat_name",chat_name);
+////                startActivity(intent);
+//
+//                finish();
+//            }
+//        });
     }
 //    private void initMsgs() {
 //        Msg msg1=  new Msg("喵喵清",Msg.type_received);
@@ -181,6 +215,108 @@ class MainActivity extends AppCompatActivity {
              e.printStackTrace();
             }
             Log.d(TAG, "run: 发送信息成功，结束线程");
+        }
+    }
+    class MyThreadRead extends Thread {
+        private Handler handler;
+        private String from;
+        private String chatText_read;
+        private String isrec;
+        public MyThreadRead(Handler handler) {
+            this.handler = handler;
+        }
+
+        @Override
+        public void run() {
+            Log.d(TAG, "run: 读取聊天记录");
+            File dir1 = getDir("abc", MODE_PRIVATE);
+            File file1 = new File(dir1, "mess_info.txt");
+            
+            try {
+                InputStream instream = new FileInputStream(file1);
+                if (instream != null) {
+                    Log.d(TAG, "run: 不为空");
+                    InputStreamReader inputreader
+                            = new InputStreamReader(instream, "UTF-8");
+                    BufferedReader buffreader = new BufferedReader(inputreader);
+                    String line = "";
+                    //分行读取
+                    while ((line = buffreader.readLine()) != null) {
+                        StringTokenizer st= new StringTokenizer(line,"*");
+                        if(st.hasMoreTokens()) {
+                            from = st.nextToken();
+                            Log.d(TAG, "run: from"+from);
+                        }
+                        if(st.hasMoreTokens()){
+                            isrec = st.nextToken();
+                            Log.d(TAG, "run: isrec="+isrec);
+                        }
+                        if(st.hasMoreTokens()){
+                            chatText_read = st.nextToken();
+                            Log.d(TAG, "run: chattext_read："+chatText_read);
+                        }
+                        if(from != null && isrec != null && chatText_read != null){
+                            if(from.equals(chat_id)){
+                                Log.d(TAG, "run: 找到聊天记录");
+                                    Message message = new Message();
+                                    message.what = 0x123;
+                                    message.obj = chatText_read;
+                                    message.arg1 = Integer.parseInt(isrec);
+                                    handler.sendMessage(message);
+                            }
+                        }
+
+                    }
+                    instream.close();//关闭输入流
+                }
+            } catch (java.io.FileNotFoundException e) {
+                Log.d("TestFile", "The File doesn't not exist.");
+            } catch (IOException e) {
+                Log.d("TestFile", e.getMessage());
+            }
+            Log.d(TAG, "MyThreadSave stop run");
+        }
+    }
+    class MyThreadSave extends Thread {
+        private Handler handler;
+        private Integer from;
+        private String chatText;
+        private String isrec;
+        public MyThreadSave(Handler handler,Integer from,String chatText,String isrec) {
+            this.handler = handler;
+            this.from = from;
+            this.chatText = chatText;
+            this.isrec = isrec;
+        }
+
+        @Override
+        public void run() {
+            Log.d(TAG, "run: 保存聊天记录");
+            File dir1 = getDir("abc", MODE_PRIVATE);
+            File file1 = new File(dir1, "mess_info.txt");
+
+            Log.d(TAG, "getDir"+dir1.toString());
+            try {
+                if(!file1.exists()){
+                    file1.createNewFile();
+                }
+                RandomAccessFile raf = new RandomAccessFile(file1, "rwd");
+                raf.seek(file1.length());
+                raf.write((from.toString()+"*"+isrec+"*"+chatText+"\r\n").getBytes());
+                raf.close();
+//                    FileOutputStream out = openFileOutput("mess_info.txt", MODE_PRIVATE);
+//                    out.write((from.toString()+"*"+"1"+"*"+chatText+"\r\n").getBytes());
+//                    Log.d(TAG, "run: 写入成功");
+//                    out.flush();
+//                    out.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Log.d(TAG, "run: 文件不存在");
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d(TAG, "run: IOE");
+            }
+            Log.d(TAG, "MyThreadSave stop run");
         }
     }
 }

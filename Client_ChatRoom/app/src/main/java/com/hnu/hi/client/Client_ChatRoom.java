@@ -59,8 +59,9 @@ public class Client_ChatRoom extends Thread {
         if(client_chatRoom == null){
             synchronized (Client_ChatRoom.class){
                 if(client_chatRoom == null)
-                    client_chatRoom = new Client_ChatRoom("10.0.2.2",6666);
-                    //client_chatRoom = new Client_ChatRoom("192.168.43.90",6666);
+                    //client_chatRoom = new Client_ChatRoom("10.0.2.2",6666);
+                    //client_chatRoom = new Client_ChatRoom("175.10.207.234",6666);
+                    client_chatRoom = new Client_ChatRoom("192.168.43.233",6666);
                     //client_chatRoom.start();
             }
         }
@@ -74,6 +75,8 @@ public class Client_ChatRoom extends Thread {
     public void setListInfo(ListInfo listInfo){
         this.listInfo = listInfo;
     }
+
+    public Integer getOwnJKNum(){return OwnJKNum;}
 
     public ListInfo getListInfo(){return listInfo;}
 
@@ -95,6 +98,19 @@ public class Client_ChatRoom extends Thread {
         Log.d(TAG, "ConnectServer: 服务器连接失败");
         return false;
     }
+    public void disConnectServer(){
+
+        try {
+            ous.close();
+            ins.close();
+            client.close();
+            client = null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+    public Socket getClient(){return client;}
 
     /*
      * 接受服务器消息
@@ -108,8 +124,14 @@ public class Client_ChatRoom extends Thread {
                 System.out.println("与服务器断开连接");
                 Log.d(TAG, "run: 与服务器断开连接");
                 //JOptionPane.showMessageDialog(null, "与服务器断开连接", "ERROR", JOptionPane.ERROR_MESSAGE);
-                System.exit(0);
+                //System.exit(0);
+                break;
             }
+        }
+    }
+    public void runWithException() throws IOException {
+        while (true) {
+                processMsg();
         }
     }
     /**
@@ -176,7 +198,7 @@ public class Client_ChatRoom extends Thread {
         Log.d(TAG, "getlist: 接受好友列表信息");
         if (recMsg.getType() != 0x03) {
             System.out.println("通讯协议错误");
-            System.exit(0);
+            //System.exit(0);
         }
         return packlist(recMsg);
     }
@@ -187,7 +209,7 @@ public class Client_ChatRoom extends Thread {
         Log.d(TAG, "getlist: 接受好友列表信息");
         if (recMsg.getType() != 0x11) {
             System.out.println("通讯协议错误");
-            System.exit(0);
+            //System.exit(0);
         }
         MsgRegResp mrr = (MsgRegResp) recMsg;
         return mrr;
