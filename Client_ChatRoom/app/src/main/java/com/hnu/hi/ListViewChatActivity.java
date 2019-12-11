@@ -199,12 +199,23 @@ public class ListViewChatActivity extends AppCompatActivity {
                         nickname = nickname_edit.getText().toString();
                         int add_id = Integer.parseInt(nickname);  //注意输入不是数字的时候
                         String list_name = "111";
-                        try {
-                            client_chatRoom.SendaddFriend(add_id, list_name);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        Toast.makeText(ListViewChatActivity.this,nickname,Toast.LENGTH_SHORT).show();
+                        new Thread(){
+                            @Override
+                            public void run(){
+                                try {
+                                    client_chatRoom.SendaddFriend(add_id, list_name);
+                                    client_chatRoom.send_fetch_list();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }.start();
+//                        try {
+//                            client_chatRoom.SendaddFriend(add_id, list_name);
+//                        } catch (IOException e) {
+//                            e.printStackTrace();
+//                        }
+                        //Toast.makeText(ListViewChatActivity.this,nickname,Toast.LENGTH_SHORT).show();
                     }
                 });
                 cancel.setOnClickListener(new View.OnClickListener() {
@@ -222,6 +233,16 @@ public class ListViewChatActivity extends AppCompatActivity {
         friendList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                new Thread(){
+                    @Override
+                    public void run(){
+                        try {
+                            client_chatRoom.send_fetch_list();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }.start();
                 flushManList();
                 getManList();
 
@@ -322,7 +343,11 @@ public class ListViewChatActivity extends AppCompatActivity {
 
                 client_chatRoom.setHandler(handler);
                 //flushManList();
-                client_chatRoom.runWithException();
+                while (true){
+                    client_chatRoom.runWithException();
+                    client_chatRoom.ConnectServer();
+                }
+
 
             } catch (IOException e) {
                 e.printStackTrace();

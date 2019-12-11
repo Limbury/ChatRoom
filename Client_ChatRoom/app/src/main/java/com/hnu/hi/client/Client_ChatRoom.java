@@ -164,6 +164,29 @@ public class Client_ChatRoom extends Thread {
         ous.flush();
         Log.d(TAG, "sendMsg: send to"+to+" "+Msg);
     }
+    /**
+     * sendMsg 发送刷新列表的信息
+     *
+     *
+     * @throws IOException
+     */
+    public void send_fetch_list() throws IOException {
+        MsgHead mct = new MsgHead();
+        //byte data[] = Msg.getBytes();
+        int TotalLen = 13;
+        //TotalLen += data.length;
+        byte type = 0x09;
+        mct.setTotalLen(TotalLen);
+        mct.setType(type);
+        //mct.setDest(to);
+        mct.setSrc(OwnJKNum);
+        //mct.setMsgText(Msg);
+
+        byte[] sendMsg = PackageTool.packMsg(mct);
+        ous.write(sendMsg);
+        ous.flush();
+        Log.d(TAG, "sendMsg: send to fetch list");
+    }
     /*
      * 读消息
      */

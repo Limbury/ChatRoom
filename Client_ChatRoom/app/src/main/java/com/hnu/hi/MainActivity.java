@@ -203,13 +203,14 @@ class MainActivity extends AppCompatActivity {
         public void run() {
             try {
             String content=inputText.getText().toString();
+            inputText.setText("");
             Log.d(TAG, "run: 发送消息聊天线程");
             client_chatRoom.sendMsg(Integer.parseInt(chat_id),content);
             Message message = new Message();
             message.what = 0x041;
             message.obj = content;
             handler.sendMessage(message);
-            inputText.setText("");
+
 
             } catch (IOException e) {
              e.printStackTrace();
